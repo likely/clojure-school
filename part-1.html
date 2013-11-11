@@ -1,0 +1,751 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>(Clojure School)</title>
+<meta name="author" content="(Likely)"/>
+<link rel="stylesheet" href="./reveal.js/css/reveal.min.css"/>
+<link rel="stylesheet" href="./reveal.js/css/theme/solarized.css" id="theme"/>
+<link rel="stylesheet" href="css/zenburn.css"/>
+<link rel="stylesheet" href="./reveal.js/css/print/pdf.css" type="text/css" media="print"/>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<h1>Clojure School</h1>
+<h2>Likely</h2>
+<h2><a href="mailto:"></a></h2>
+<h2></h2></section>
+
+<section>
+<section id="sec-1" >
+
+<h2>Getting Set Up</h2>
+<p>
+First, you’ll need a Java Virtual Machine, or JVM, and its associated development tools, called the JDK. This is the software which runs a Clojure program. If you’re on Windows, install Oracle JDK 1.7. If you’re on OS X or Linux, you may already have a JDK installed. In a terminal, try:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">which javac
+</pre>
+</div>
+
+<p>
+If you see something like
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">/usr/bin/javac
+</pre>
+</div>
+
+<p>
+Then you're good to go
+</p>
+</section>
+</section>
+<section>
+<section id="sec-2" >
+
+<h2>Leiningen</h2>
+<div class="org-src-container">
+
+<pre class="src src-bash">mkdir -p ~/bin
+cd ~/bin
+curl -O https://raw.github.com/technomancy/leiningen/stable/bin/lein
+chmod a+x lein
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">cd
+lein new scratch
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-bash">export PATH="$PATH":~/bin
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-3" >
+
+<h2>The structure of programs</h2>
+<div class="org-src-container">
+
+<pre class="src src-bash">lein repl
+</pre>
+</div>
+
+<p>
+This is an interactive Clojure environment called a REPL, for “Read, Evaluate, Print Loop”. It’s going to read a program we enter, run that program, and print the results. REPLs give you quick feedback, so they’re a great way to explore a program interactively, run tests, and prototype new ideas.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-4" >
+
+<h2>The simplest program</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; nil
+nil
+</pre>
+</div>
+
+<p>
+nil is the most basic value in Clojure. It represents the absence of information.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-5" >
+
+<h2>Truthiness</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; true
+true
+user=&gt; false
+false
+</pre>
+</div>
+
+<p>
+true and false are a pair of special values called Booleans. They mean exactly what you think: whether a statement is true or false. true, false, and nil form the three poles of the Lisp logical system.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-6" >
+
+<h2>OTher values</h2>
+<p>
+Numbers
+</p>
+
+<p>
+0
+-42
+1.2e-5
+1/3
+</p>
+
+<p>
+Strings
+"Hi there!"
+</p>
+</section>
+</section>
+<section>
+<section id="sec-7" >
+
+<h2>Functions</h2>
+<p>
+inc
+</p>
+
+<p>
+This is a verb inc, short for increment. Specifically inc is a symbol which points to a verb. Just like run is a name for the concept of running.
+</p>
+
+<p>
+Unlike the number 0, or the string “hi”, symbols are references to other values. when Clojure evaluates a symbol, it looks up that symbol’s meaning. Look up inc, and you get #&lt;core$inc clojure.core$inc@6f7ef41c&gt;
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-8" >
+
+<h2>Quoting</h2>
+<p>
+Can we refer to a symbol directly, rather than looking up its meaning?
+</p>
+
+<p>
+user=&gt; 'inc
+inc
+</p>
+
+<p>
+The single quote ' escapes an expression. It says “Rather than evaluating this text, simply return the text itself, unchanged. Quote a symbol, get a symbol. Quote a number, get a number. Quote anything, and get it back exactly as it came in.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-9" >
+
+<h2>Lists</h2>
+<p>
+Lisp originally stood for LISt Processing, and lists are still at the core of the language. This list contains three elements: the numbers 1, 2, and 3. Lists can contain anything: numbers, strings, even other lists:
+</p>
+
+<p>
+user=&gt; '(nil "hi")
+(nil "hi")
+</p>
+
+<p>
+user=&gt; '(1 (2 (3 ())))
+(1 (2 (3 ())))
+</p>
+</section>
+</section>
+<section>
+<section id="sec-10" >
+
+<h2>Trees</h2>
+<p>
+You could think of this structure as a tree–which is a provocative idea, because languages are like trees too: sentences are comprised of clauses, which can be nested, and each clause may have subjects modified by adjectives, and verbs modified by adverbs, and so on. "Lindsay, my best friend, took the dog which we found together at the pound on fourth street, for a walk with her mother Michelle.”
+</p>
+
+<p>
+Took
+  Lindsay
+    my best friend
+  the dog
+    which we found together
+      at the pound
+        on fourth street
+    for a walk
+      with her mother
+        Michelle
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-11" >
+
+<h2>Syntax Trees</h2>
+<p>
+clj=&gt; '(inc 0)
+(inc 0)
+</p>
+
+<p>
+A basic sentence. Remember, since it’s quoted, we’re talking about the tree, the text, the expression, by itself. Absent interpretation. If we remove the single-quote, Clojure will interpret the expression:
+</p>
+
+<p>
+user=&gt; (inc 0)
+1
+</p>
+</section>
+</section>
+<section>
+<section id="sec-12" >
+
+<h2>Nesting</h2>
+<p>
+Increment
+  increment
+    the number zero
+</p>
+
+
+<p>
+user=&gt; (inc (inc 0))
+2
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-13" >
+
+<h2>Evaluation</h2>
+<p>
+Every list starts with a verb. Parts of a list are evaluated from left to right. Innermost lists are evaluated before outer lists.
+</p>
+
+<p>
+(+ 1 (- 5 2) (+ 3 4))
+(+ 1 3       (+ 3 4))
+(+ 1 3       7)
+11
+</p>
+</section>
+</section>
+<section>
+<section id="sec-14" >
+
+<h2>That's It!</h2>
+<p>
+The entire grammar of Lisp: the structure for every expression in the language. We transform expressions by substituting meanings for symbols, and obtain some result. This is the core of the Lambda Calculus, and it is the theoretical basis for almost all computer languages. Ruby, Javascript, C, Haskell; all languages express the text of their programs in different ways, but internally all construct a tree of expressions. Lisp simply makes it explicit.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-15" >
+
+<h2>Types</h2>
+<p>
+A type is a group of values that work in the same way.
+</p>
+
+<p>
+Every language has a type system; a particular way of organizing nouns into types, figuring out which verbs make sense on which types, and relating types to one another.
+</p>
+
+<p>
+Strong dynamic typing.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-16" >
+
+<h2>Numerics</h2>
+<p>
+user=&gt; (type 3)
+java.lang.Long
+</p>
+</section>
+</section>
+<section>
+<section id="sec-17" >
+
+<h2>Strings</h2>
+<p>
+Every value in Clojure has a string representation.
+</p>
+
+<p>
+user=&gt; (str "cat")
+"cat"
+user=&gt; (str 'cat)
+"cat"
+user=&gt; (str 1)
+"1"
+user=&gt; (str true)
+"true"
+user=&gt; (str '(1 2 3))
+"(1 2 3)"
+user=&gt; (str nil)
+""
+</p>
+</section>
+</section>
+<section>
+<section id="sec-18" >
+
+<h2>Concatentation</h2>
+<p>
+user=&gt; (str "meow " 3 " times")
+"meow 3 times"
+</p>
+</section>
+</section>
+<section>
+<section id="sec-19" >
+
+<h2>Regular Expressions</h2>
+<p>
+user=&gt; (re-find #"cat" "mystic cat mouse")
+"cat"
+user=&gt; (re-find #"cat" "only dogs here")
+nil
+</p>
+
+<p>
+user=&gt; (rest (re-matches #"(.+):(.+)" "mouse:treat"))
+("mouse" "treat")
+</p>
+</section>
+</section>
+<section>
+<section id="sec-20" >
+
+<h2>Booleans</h2>
+<p>
+Everything is truthy except for nil and false.
+</p>
+
+<p>
+user=&gt; (boolean true)
+true
+user=&gt; (boolean false)
+false
+user=&gt; (boolean nil)
+false
+user=&gt; (boolean 0)
+true
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-21" >
+
+<h2>Logic</h2>
+<p>
+user=&gt; (and true false true)
+false
+user=&gt; (and true true true)
+true
+user=&gt; (and 1 2 3)
+3
+Similarly, or returns the first positive value.
+</p>
+
+<p>
+user=&gt; (or false 2 3)
+2
+user=&gt; (or false nil)
+nil
+And not inverts the logical sense of a value:
+</p>
+
+<p>
+user=&gt; (not 2)
+false
+user=&gt; (not nil)
+true
+</p>
+</section>
+</section>
+<section>
+<section id="sec-22" >
+
+<h2>Symbols</h2>
+<p>
+user=&gt; (class 'str)
+clojure.lang.Symbol
+Symbols can have either short or full names. The short name is used to refer to things locally. The fully qualified name is used to refer unambiguously to a symbol from anywhere. If I were a symbol, my name would be “Kyle”, and my full name “Kyle Kingsbury.”
+</p>
+
+<p>
+Symbol names are separated with a /. For instance, the symbol str is also present in a family called clojure.core; the corresponding full name is clojure.core/str.
+</p>
+
+<p>
+user=&gt; (= str clojure.core/str)
+true
+user=&gt; (name 'clojure.core/str)
+"str"
+When we talked about the maximum size of an integer, that was a fully-qualified symbol, too.
+</p>
+
+<p>
+(type 'Integer/MAX<sub>VALUE</sub>)
+clojure.lang.Symbol
+</p>
+</section>
+</section>
+<section>
+<section id="sec-23" >
+
+<h2>Keywords</h2>
+<p>
+user=&gt; (type :cat)
+clojure.lang.Keyword
+user=&gt; (str :cat)
+":cat"
+user=&gt; (name :cat)
+"cat"
+</p>
+</section>
+</section>
+<section>
+<section id="sec-24" >
+
+<h2>Lists</h2>
+<p>
+user=&gt; '(1 2 3)
+(1 2 3)
+user=&gt; (type '(1 2 3))
+clojure.lang.PersistentList
+Remember, we quote lists with a ' to prevent them from being evaluated. You can also construct a list using list:
+</p>
+
+<p>
+user=&gt; (list 1 2 3)
+(1 2 3)
+Lists are comparable just like every other value:
+</p>
+
+<p>
+user=&gt; (= (list 1 2) (list 1 2))
+true
+</p>
+</section>
+</section>
+<section>
+<section id="sec-25" >
+
+<h2>Conj</h2>
+<p>
+You can modify a list by conjoining an element onto it:
+</p>
+
+<p>
+user=&gt; (conj '(1 2 3) 4)
+(4 1 2 3)
+We added 4 to the list–but it appeared at the front. Why? Internally, lists are stored as a chain of values: each link in the chain is a tiny box which holds the value and a connection to the next link. This data structure, called a linked list, offers immediate access to the first element.
+</p>
+
+<p>
+user=&gt; (first (list 1 2 3))
+1
+But getting to the second element requires an extra hop down the chain
+</p>
+
+<p>
+user=&gt; (second (list 1 2 3))
+2
+and the third element a hop after that, and so on.
+</p>
+
+<p>
+user=&gt; (nth (list 1 2 3) 2)
+3
+</p>
+</section>
+</section>
+<section>
+<section id="sec-26" >
+
+<h2>Vectors</h2>
+<p>
+Vectors are surrounded by square brackets, just like lists are surrounded by parentheses. Because vectors aren’t evaluated like lists are, there’s no need to quote them:
+</p>
+
+<p>
+user=&gt; [1 2 3]
+[1 2 3]
+user=&gt; (type [1 2 3])
+clojure.lang.PersistentVector
+You can also create vectors with vector, or change other structures into vectors with vec:
+</p>
+
+<p>
+user=&gt; (vector 1 2 3)
+[1 2 3]
+user=&gt; (vec (list 1 2 3))
+[1 2 3]
+conj on a vector adds to the end, not the start:
+</p>
+
+<p>
+user=&gt; (conj [1 2 3] 4)
+[1 2 3 4]
+</p>
+
+<p>
+Our friends first, second, and nth work here too; but unlike lists, nth is fast on vectors. That’s because internally, vectors are represented as a very broad tree of elements, where each part of the tree branches into 32 smaller trees. Even very large vectors are only a few layers deep, which means getting to elements only takes a few hops.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-27" >
+
+<h2>Sets</h2>
+</section>
+
+</section>
+<section>
+<section id="sec-28" >
+
+<h2>Maps</h2>
+</section>
+
+</section>
+<section>
+<section id="sec-29" >
+
+<h2>Composition</h2>
+<p>
+{:name "Amelia Earhart"
+</p>
+<p>
+:birth 1897
+</p>
+<p>
+:death 1939
+</p>
+<p>
+ :awards {"US"    #{"Distinguished Flying Cross" "National Women's Hall of Fame"}
+          "World" #{"Altitude record for Autogyro" "First to cross Atlantic twice"}}}
+Or a recipe:
+</p>
+
+<p>
+ :ingredients {"flour"           [(+ 2 1/4) :cup]
+               "baking soda"     [1   :teaspoon]
+               "salt"            [1   :teaspoon]
+               "butter"          [1   :cup]
+               "sugar"           [3/4 :cup]
+               "brown sugar"     [3/4 :cup]
+               "vanilla"         [1   :teaspoon]
+               "eggs"            2
+               "chocolate chips" [12  :ounce]}
+Or the Gini coefficients of nations, as measured over time:
+</p>
+
+<p>
+{:title "Chocolate chip cookies"
+{"Afghanistan" {2008 27.8}
+ "Indonesia"   {2008 34.1 2010 35.6 2011 38.1}
+ "Uruguay"     {2008 46.3 2009 46.3 2010 45.3}}
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-30" >
+
+<h2>Bindings</h2>
+<p>
+We know that symbols are names for things, and that when evaluated, Clojure replaces those symbols with their corresponding values. +, for instance, is a symbol which points to the verb #&lt;core$<sub>PLUS</sub>_ clojure.core$<sub>PLUS</sub>_@12992c&gt;.
+</p>
+
+<p>
+user=&gt; +
+#&lt;core$<sub>PLUS</sub>_ clojure.core$<sub>PLUS</sub>_@12992c&gt;
+When you try to use a symbol which has no defined meaning, Clojure refuses:
+</p>
+
+<p>
+user=&gt; cats
+</p>
+
+<p>
+CompilerException java.lang.RuntimeException: Unable to resolve symbol: cats in this context, compiling:(NO<sub>SOURCE</sub><sub>PATH</sub>:0:0)
+But we can define a meaning for a symbol within a specific expression, using let.
+</p>
+
+<p>
+user=&gt; (let [cats 5] (str "I have " cats " cats."))
+"I have 5 cats."
+</p>
+</section>
+</section>
+<section>
+<section id="sec-31" >
+
+<h2>Bindings are local</h2>
+<p>
+Let bindings apply only within the let expression itself. They also override any existing definitions for symbols at that point in the program. For instance, we can redefine addition to mean subtraction, for the duration of a let:
+</p>
+
+<p>
+user=&gt; (let [+ -] (+ 2 3))
+-1
+But that definition doesn’t apply outside the let:
+</p>
+
+<p>
+user=&gt; (+ 2 3)
+5
+</p>
+</section>
+</section>
+<section>
+<section id="sec-32" >
+
+<h2>Bindings can be composed</h2>
+<p>
+We can also provide multiple bindings. Since Clojure doesn’t care about spacing, alignment, or newlines, I’ll write this on multiple lines for clarity.
+</p>
+
+<p>
+user=&gt; (let [person   "joseph"
+             num-cats 186]
+         (str person " has " num-cats " cats!"))
+"joseph has 186 cats!"
+When multiple bindings are given, they are evaluated in order. Later bindings can use previous bindings.
+</p>
+
+<p>
+user=&gt; (let [cats 3
+             legs (* 4 cats)]
+         (str legs " legs all together"))
+"12 legs all together"
+</p>
+</section>
+</section>
+<section>
+<section id="sec-33" >
+
+<h2>Functions</h2>
+<p>
+We saw in chapter one that Clojure evaluates lists by substituting some other value in their place:
+</p>
+
+<p>
+user=&gt; (inc 1)
+2
+inc takes any number, and is replaced by that number plus one. That sounds an awful lot like a let:
+</p>
+
+<p>
+user=&gt; (let [x 1] (+ x 1))
+2
+If we bound x to 5 instead of 1, this expression would evaluate to 6. We can think about inc like a let expression, but without particular values provided for the symbols.
+</p>
+
+<p>
+(let [x] (+ x 1))
+We can’t actually evaluate this program, because there’s no value for x yet. It could be 1, or 4, or 1453. We say that x is unbound, because it has no binding to a particular value. This is the nature of the function: an expression with unbound symbols.
+</p>
+
+<p>
+user=&gt; (fn [x] (+ x 1))
+#&lt;user$eval293$fn_<sub>294</sub> user$eval293$fn_<sub>294</sub>@663fc37&gt;
+</p>
+</section>
+</section>
+</div>
+</div>
+<script src="./reveal.js/lib/js/head.min.js"></script>
+<script src="./reveal.js/js/reveal.min.js"></script>
+<script>
+
+        		// Full list of configuration options available here:
+        		// https://github.com/hakimel/reveal.js#configuration
+        		Reveal.initialize({
+        			controls: true,
+        			progress: true,
+        			history: false,
+        			center: true,
+        			rollingLinks: false,
+        			keyboard: true,
+        			overview: true,
+        			 // slide width
+        			 // slide height
+        			 // slide margin
+        			 // slide minimum scaling factor
+        			 // slide maximum scaling factor
+
+
+        			theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        			transition: Reveal.getQueryHash().transition || 'fade', // default/cube/page/concave/zoom/linear/fade/none
+        			transitionSpeed: 'default',
+
+        			// Optional libraries used to extend on reveal.js
+        			dependencies: [
+        				{ src: './reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } }
+        				,{ src: './reveal.js/plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } }
+        				,{ src: './reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } }
+        				,{ src: './reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        				,{ src: './reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } }
+        				,{ src: './reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: './reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: './reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+         				
+        			]
+        		});
+</script>
+</body>
+</html>
