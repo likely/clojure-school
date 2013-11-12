@@ -7,21 +7,35 @@
 #+OPTIONS: num:nil toc:nil reveal_mathjax:t
 #+REVEAL_TRANS: fade
 
-* Who is already a programmer?
+* Welcome
+* Introductions
 
-* Experience of LISP?
+- Henry Garner (CTO, Likely)
 
-* What text editor?
+- James Henderson (Senior Developer, Likely)
 
-Emacs
-Vim
-Sublime
-Textmate
-Eclipse
-IntelliJ
-NetBeans
 
-* Who has Java?
+Professionally using Clojure for 18 months
+
+* Who are you?
+
+... and what are you hoping to get out of these sessions?
+
+* What we'll cover
+  
+  Getting up and running
+  Language primitives
+  Working with sequences
+  Working with higher order functions
+  Working with real data
+  Moving beyond the REPL
+
+* Housekeeping
+  Experience of LISP?
+  Other functional languages?
+  What text editor?
+  Who has Java?
+  Who has leiningen?
 
 * Getting Set Up
 
@@ -91,8 +105,6 @@ user=> false
 false
 #+END_SRC
 
-true and false are a pair of special values called Booleans. They mean exactly what you think: whether a statement is true or false. true, false, and nil form the three poles of the Lisp logical system.
-
 * Basic Types
 
 0
@@ -101,6 +113,7 @@ true and false are a pair of special values called Booleans. They mean exactly w
 1/3
 "Hi there!"
 :keywords
+#"\d+"
 
 * Collection Types
 
@@ -167,6 +180,41 @@ Every list starts with a verb. Parts of a list are evaluated from left to right.
 (+ 1 3       7)
 11
 
+* Ifs, buts...
+
+* Control structures:
+
+user=> (if (> 3 2) "Higher" "Lower")
+"Higher"
+
+user=> (when (< 3 2) "Lower")
+nil
+
+user=> (when (> 3 2)
+        (println "3 is greater than 2")
+	"Higher")
+3 is greater than 2
+"Higher"
+
+See also: `if-not` and `when-not`
+
+* More conditionals
+
+user=> (case (inc 3)
+         3 "Uh oh"
+         4 "Yep!"
+         "Not so sure...")
+"Yep!"
+
+user=> (cond
+         (= 4 (inc 2)) "(inc 2) is 4"
+         (= 4 (/ 8 2)) "Cond picks the first correct case"
+	 (zero? (- (* 4 2) 8) "This is true, but we won't get here"
+         :otherwise "None of the above."
+"Cond picks the first correct case"
+
+See also: condp
+
 * Having fn yet?
 
 user=> (fn [x] (+ x 1))
@@ -174,6 +222,11 @@ user=> (fn [x] (+ x 1))
 
 We've created a function!
 
+user=> (fn [x]
+         (if (even? x)
+           (inc x)
+           (dec x)))
+#<user$eval149$fn__150 user$eval149$fn__150@397d812c>
 
 * Usage
 
@@ -201,6 +254,7 @@ user=> (defn half [] 1/2)
 #'user/half
 user=> (half)
 1/2
+
 But if we try to use our earlier form with one argument, Clojure complains that the arity–the number of arguments to the function–is incorrect.
 
 user=> (half 10)
@@ -220,7 +274,6 @@ user=> (half 10)
 5
 
 
-
 * Variable Arities
 
 Some functions can take any number of arguments. For that, Clojure provides &, which slurps up all remaining arguments as a list:
@@ -238,7 +291,6 @@ user=> (vargs 1 2)
 {:x 1, :y 2, :more nil}
 user=> (vargs 1 2 3 4 5)
 {:x 1, :y 2, :more (3 4 5)}
-
 
 * Bindings
 
@@ -284,6 +336,13 @@ user=> (let [cats 3
 "12 legs all together"
 
 * Keywords as functions
+
+user=> (def my-map {:a 1 :b 2})
+#'user/my-map
+
+user=> (:a my-map)
+1
+
 * Destructuring
 
 user=> (def my-map {:a 1 :b 2 :c [3 4 5]})
@@ -316,25 +375,38 @@ user=> (let [{[c1 c2 c3] :c} my-map]
          (+ c1 c2 c3))
 12
 
-* Functions
 
-We saw in chapter one that Clojure evaluates lists by substituting some other value in their place:
+* The sequence core library
+* A brief tour of clojure.core
 
-user=> (inc 1)
-2
-inc takes any number, and is replaced by that number plus one. That sounds an awful lot like a let:
-
-user=> (let [x 1] (+ x 1))
-2
-If we bound x to 5 instead of 1, this expression would evaluate to 6. We can think about inc like a let expression, but without particular values provided for the symbols.
-
-(let [x] (+ x 1))
-We can’t actually evaluate this program, because there’s no value for x yet. It could be 1, or 4, or 1453. We say that x is unbound, because it has no binding to a particular value. This is the nature of the function: an expression with unbound symbols.
-
-user=> (fn [x] (+ x 1))
-#<user$eval293$fn__294 user$eval293$fn__294@663fc37>
+Map functions
+assoc
+dissoc
+keys
+vals
+get
+assoc-in
 
 
+* Vector functions
+
+distinct
+first
+second
+nth
+last
+reverse
+sort
+conj cons concat interleave interpose
+zipmap
+
+* Sheer laziness
+
+take
+drop
+partition partition-all
+split-at
+range
 
 * Higher order functions
 
@@ -382,36 +454,8 @@ You can refer to multiple args by %1, %2, ...
 
 #(+ %1 %2)
 
-* The sequence core library
 
-
-Simple
-
-distinct
-assoc
-dissoc
-first
-second
-nth
-last
-reverse
-sort
-keys
-vals
-get
-conj cons concat interleave interpose
-zipmap
-
-
-Lazy
-
-take
-drop
-partition partition-all
-split-at
-range
-
-Higher Order
+* Other higher-order functions
 
 sort-by
 map
@@ -421,7 +465,8 @@ remove
 reduce
 partition-by
 group-by
-take
+update-in
+
 
 * Namespaces
 
@@ -431,7 +476,6 @@ We can refer to symbols in other namespaces.
 
 (ns some.namespace
   (:require [other.namespace :as blah]))
-
 
 * Leiningen's project.clj
 
@@ -469,6 +513,9 @@ Free, JSON api that provides current weather data and forecasts.
 - On how many of the last 10 days has it been cloudy?
 - On how many of the last 10 days has it not been cloudy?
 
+* One I prepared earlier
+
+  https://github.com/likely/weather
 
 * Clojure the Parasite
 
