@@ -434,14 +434,27 @@ We can refer to symbols in other namespaces.
   (:require [other.namespace :as blah]))
 
 
-* Live Emacs Demo
 
+* Leiningen's project.clj
 
+(defproject weather "0.1.0-SNAPSHOT"
+  :description "FIXME: write description"
+  :url "http://example.com/FIXME"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :dependencies [[org.clojure/clojure "1.5.1"]
+                 [clj-http "0.7.7"]])
 
+* Your code goes here
 
+  src/weather/core.clj
 
+Open up that file and remove the template function.
 
+* Add dependencies
 
+(ns weather.core
+  (:require [clj-http.client :as http]))
 
 * Let's use some real data
 
