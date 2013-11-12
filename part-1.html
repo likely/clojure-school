@@ -56,7 +56,7 @@ Professionally using Clojure for 18 months
 <section>
 <section id="sec-4" >
 
-<h2>What we'll cover</h2>
+<h2>What we'll cover today</h2>
 <ul class="org-ul">
 <li>Getting up and running
 </li>
@@ -87,13 +87,18 @@ Professionally using Clojure for 18 months
 <section id="sec-6" >
 
 <h2>Housekeeping</h2>
-<p>
-Experience of LISP?
-Other functional languages?
-What text editor?
-Who has Java?
-Who has leiningen?
-</p>
+<ul class="org-ul">
+<li>Experience of LISP?
+</li>
+<li>Other functional languages?
+</li>
+<li>What text editor?
+</li>
+<li>Who has Java?
+</li>
+<li>Who has leiningen?
+</li>
+</ul>
 </section>
 </section>
 <section>
@@ -103,7 +108,6 @@ Who has leiningen?
 <p>
 First, you’ll need a Java Virtual Machine, or JVM, and its associated development tools, called the JDK. This is the software which runs a Clojure program. If you’re on Windows, install Oracle JDK 1.7. If you’re on OS X or Linux, you may already have a JDK installed. In a terminal, try:
 </p>
-
 
   <pre><code data-trim class="clojure">
 which javac
@@ -191,7 +195,7 @@ nil
   </code></pre>
 
 <p>
-nil is the most basic value in Clojure. It represents the absence of information.
+nil is the most basic value in Clojure.
 </p>
 </section>
 </section>
@@ -265,7 +269,7 @@ Vectors
 <section>
 <section id="sec-15" >
 
-<h2>Deffo</h2>
+<h2>Def</h2>
   <pre><code data-trim class="clojure">
 user=> (def x 3)
 #'user/x
@@ -287,7 +291,8 @@ user=> x
 <h2>Lists</h2>
   <pre><code data-trim class="clojure">
 user=> (1 2 3)
-ClassCastException java.lang.Long cannot be cast to clojure.lang.IFn  user/eval146 (NO_SOURCE_FILE:1)
+ClassCastException java.lang.Long cannot be cast to clojure.lang.IFn 
+  user/eval146 (NO_SOURCE_FILE:1)
   </code></pre>
 </section>
 </section>
@@ -321,12 +326,11 @@ user=> (inc x)
 <section id="sec-19" >
 
 <h2>Nesting</h2>
-<p>
+  <pre>
 Increment
   increment
-    the number zero
-</p>
-
+    the number 
+  </pre>
   <pre><code data-trim class="clojure">
 user=> (inc (inc 0))
 2
@@ -402,6 +406,7 @@ See also: condp
 <h2>Having fn yet?</h2>
   <pre><code data-trim class="clojure">
 user=> (fn [x] (+ x 1))
+
 #<user$eval149$fn__150 user$eval149$fn__150@397d812b>
   </code></pre>
 
@@ -414,6 +419,7 @@ user=> (fn [x]
          (if (even? x)
            (inc x)
            (dec x)))
+
 #<user$eval149$fn__150 user$eval149$fn__150@397d812c>
   </code></pre>
 </section>
@@ -437,8 +443,12 @@ You probably won't see this in production code&#x2026;
 
 <h2>Defn</h2>
   <pre><code data-trim class="clojure">
-user=> (def half (fn [number] (/ number 2)))
+user=> (def half
+         (fn [number]
+            (/ number 2)))
+
 #'user/half
+
 user=> (half 6)
 3
   </code></pre>
@@ -448,7 +458,8 @@ Creating a function and binding it to a var is so common that it has its own for
 </p>
 
   <pre><code data-trim class="clojure">
-user=> (defn half [number] (/ number 2))
+user=> (defn half [number]
+          (/ number 2))
 #'user/half
   </code></pre>
 </section>
@@ -474,10 +485,10 @@ But if we try to use our earlier form with one argument, Clojure complains that 
 
   <pre><code data-trim class="clojure">
 user=> (half 10)
+  
+ArityException Wrong number of args (1) passed to:
+  user$half  clojure.lang.AFn.throwArity (AFn.java:437)
   </code></pre>
-<p>
-ArityException Wrong number of args (1) passed to: user$half  clojure.lang.AFn.throwArity (AFn.java:437)
-</p>
 </section>
 </section>
 <section>
@@ -492,8 +503,12 @@ To handle multiple arities, functions have an alternate form. Instead of an argu
 user=> (defn half
          ([]  1/2)
          ([x] (/ x 2)))
+
+#'user/half
+
 user=> (half)
 1/2
+
 user=> (half 10)
 5
   </code></pre>
@@ -513,11 +528,15 @@ user=> (defn vargs
           :y    y
           :more more-args})
 #'user/vargs
+
 user=> (vargs 1)
 
-ArityException Wrong number of args (1) passed to: user$vargs  clojure.lang.AFn.throwArity (AFn.java:437)
+ArityException Wrong number of args (1) passed to: user$vargs 
+clojure.lang.AFn.throwArity (AFn.java:437)
+
 user=> (vargs 1 2)
 {:x 1, :y 2, :more nil}
+
 user=> (vargs 1 2 3 4 5)
 {:x 1, :y 2, :more (3 4 5)}
   </code></pre>
@@ -529,27 +548,21 @@ user=> (vargs 1 2 3 4 5)
 
 <h2>Bindings</h2>
 <p>
-We know that symbols are names for things, and that when evaluated, Clojure replaces those symbols with their corresponding values. +, for instance, is a symbol which points to the verb #&lt;core$<sub>PLUS</sub>_ clojure.core$<sub>PLUS</sub>_@12992c&gt;.
+We know that symbols are names for things, and that when evaluated, Clojure replaces those symbols with their corresponding values.
 </p>
 
   <pre><code data-trim class="clojure">
 user=> +
 #<core$_PLUS_ clojure.core$_PLUS_@12992c>
   </code></pre>
+
 <p>
-When you try to use a symbol which has no defined meaning, Clojure refuses:
+We can create names which are locally scoped.
 </p>
 
   <pre><code data-trim class="clojure">
-user=> cats
-  </code></pre>
-<p>
-CompilerException java.lang.RuntimeException: Unable to resolve symbol: cats in this context, compiling:(NO<sub>SOURCE</sub><sub>PATH</sub>:0:0)
-But we can define a meaning for a symbol within a specific expression, using let.
-</p>
-
-  <pre><code data-trim class="clojure">
-user=> (let [cats 5] (str "I have " cats " cats."))
+user=> (let [cats 5]
+          (str "I have " cats " cats."))
 "I have 5 cats."
   </code></pre>
 </section>
@@ -564,7 +577,8 @@ Let bindings apply only within the let expression itself. They also override any
 </p>
 
   <pre><code data-trim class="clojure">
-user=> (let [+ -] (+ 2 3))
+user=> (let [+ -]
+         (+ 2 3))
 -1
   </code></pre>
 <p>
@@ -621,7 +635,7 @@ user=> (:a my-map)
 <section>
 <section id="sec-33" >
 
-<h2>Destructuring 1</h2>
+<h2>Destructuring</h2>
   <pre><code data-trim class="clojure">
 user=> (def my-map {:a 1 :b 2 :c [3 4 5]})
 #'user/my-map
@@ -631,19 +645,6 @@ user=> (let [a (:a my-map)
          (+ a b))
 3
 
-user=> (let [a (:a my-map)
-             b (:b my-map)]
-         (+ a b))
-3
-  </code></pre>
-</section>
-
-</section>
-<section>
-<section id="sec-34" >
-
-<h2>Destructuring 2</h2>
-  <pre><code data-trim class="clojure">
 user=> (let [{a :a b :b} my-map]
          (+ a b))
 3
@@ -656,9 +657,9 @@ user=> (let [{:keys [a b]} my-map]
 
 </section>
 <section>
-<section id="sec-35" >
+<section id="sec-34" >
 
-<h2>Destructuring 3</h2>
+<h2>Nested Destructuring</h2>
   <pre><code data-trim class="clojure">
 user=> (let [{:keys [c]} my-map
              [c1 c2 c3] c]
@@ -674,6 +675,30 @@ user=> (let [{[c1 c2 c3] :c} my-map]
 
 </section>
 <section>
+<section id="sec-35" >
+
+<h2>A brief tour of clojure.core</h2>
+<p>
+Working with maps:
+</p>
+
+  <pre><code data-trim class="clojure">
+user=> (def my-map {:a 1 :b 2})
+#'user/my-map
+
+user=> (assoc my-map :c 3)
+{:a 1, :c 3, :b 2}
+
+user=> (dissoc my-map :a)
+{:b 2}
+
+user=> my-map
+{:a 1, :b 2}
+  </code></pre>
+</section>
+
+</section>
+<section>
 <section id="sec-36" >
 
 <h2>A brief tour of clojure.core</h2>
@@ -681,190 +706,116 @@ user=> (let [{[c1 c2 c3] :c} my-map]
 Working with maps:
 </p>
 
-<p>
-user=&gt; (def my-map {:a 1 :b 2})
+  <pre><code data-trim class="clojure">
+user=> (def my-map {:a 1 
+                    :b 2 
+                    :c {:d 4 
+                        :e 5}})
 #'user/my-map
-</p>
 
-<p>
-user=&gt; (assoc my-map :c 3)
-{:a 1, :c 3, :b 2}
-</p>
+user=> (keys my-map)
+(:a :c :b)
 
-<p>
-user=&gt; (dissoc my-map :a)
-{:b 2}
-</p>
+user=> (vals my-map)
+(1 {:d 4, :e 5} 2)
 
-<p>
-user=&gt; my-map
-{:a 1, :b 2}
-</p>
+user=> (assoc-in my-map [:c :f] 6)
+{:a 1, :c {:f 6, :d 4, :e 5}, :b 2}
+  </code></pre>
 </section>
+
 </section>
 <section>
 <section id="sec-37" >
 
-<h2>A brief tour of clojure.core</h2>
-<p>
-Working with maps:
-</p>
+<h2>Vector functions</h2>
+  <pre><code data-trim class="clojure">
+user=> (def my-coll [2 3 1 5 6 4 0])
+#'user/my-coll
 
-<p>
-user=&gt; (def my-map {:a 1 
-</p>
-<p>
-:b 2 
-</p>
-<p>
-:c {:d 4 
-</p>
-<p>
-                        :e 5}})
-#'user/my-map
-</p>
+user=> (first my-coll)
+2
 
-<p>
-user=&gt; (keys my-map)
-(:a :c :b)
-</p>
+user=> (second my-coll)
+3
 
-<p>
-user=&gt; (vals my-map)
-(1 {:d 4, :e 5} 2)
-</p>
+user=> (nth my-coll 4)
+6
 
-<p>
-user=&gt; (assoc-in my-map [:c :f] 6)
-{:a 1, :c {:f 6, :d 4, :e 5}, :b 2}
-</p>
+user=> (conj my-coll 7)
+[2 3 1 5 6 4 0 7]
+
+user=> my-coll
+[2 3 1 5 6 4 0]
+  </code></pre>
 </section>
+
 </section>
 <section>
 <section id="sec-38" >
 
 <h2>Vector functions</h2>
-<p>
-user=&gt; (def my-coll [2 3 1 5 6 4 0])
+  <pre><code data-trim class="clojure">
+user=> (def my-coll [2 3 1 5 6 4 0])
 #'user/my-coll
-</p>
 
-<p>
-user=&gt; (first my-coll)
-2
-</p>
-
-<p>
-user=&gt; (second my-coll)
-3
-</p>
-
-<p>
-user=&gt; (nth my-coll 4)
-6
-</p>
-
-<p>
-user=&gt; (conj my-coll 7)
-[2 3 1 5 6 4 0 7]
-</p>
-
-<p>
-user=&gt; my-coll
-[2 3 1 5 6 4 0]
-</p>
-</section>
-</section>
-<section>
-<section id="sec-39" >
-
-<h2>Vector functions</h2>
-<p>
-user=&gt; (def my-coll [2 3 1 5 6 4 0])
-#'user/my-coll
-</p>
-
-<p>
-user=&gt; (sort my-coll)
+user=> (sort my-coll)
 (0 1 2 3 4 5 6)
-</p>
 
-<p>
-user=&gt; (interpose -1 my-coll)
+user=> (interpose -1 my-coll)
 (2 -1 3 -1 1 -1 5 -1 6 -1 4 -1 0)
-</p>
 
-<p>
-user=&gt; (zipmap [:a :b :c :d :e :f] my-coll)
+user=> (zipmap [:a :b :c :d :e :f] my-coll)
 {:f 4, :e 6, :d 5, :c 1, :b 3, :a 2}
-</p>
 
-<p>
-user=&gt; (frequencies "Hello world!")
+user=> (frequencies "Hello world!")
 {\space 1, \! 1, \d 1, \e 1, \H 1, \l 3, \o 2, \r 1, \w 1}
-</p>
-
+  </code></pre>
 <p>
 See also: concat, interleave, cons, last, butlast
 </p>
 </section>
 </section>
 <section>
-<section id="sec-40" >
+<section id="sec-39" >
 
 <h2>Sheer laziness</h2>
 <p>
 While Clojure is technically eager by default, most of the functions on collections operate lazily:
 </p>
-
-<p>
-user=&gt; (def my-coll [0 1 2 3 4 5 6])
+  <pre><code data-trim class="clojure">
+user=> (def my-coll [0 1 2 3 4 5 6])
 #'user/my-coll
-</p>
 
-<p>
-user=&gt; (take 3 my-coll)
+user=> (take 3 my-coll)
 (0 1 2)
-</p>
 
-<p>
-user=&gt; (drop 2 my-coll)
+user=> (drop 2 my-coll)
 (2 3 4 5 6)
-</p>
 
-<p>
-user=&gt; (partition 3 my-coll)
+user=> (partition 3 my-coll)
 ((0 1 2) (3 4 5))
-</p>
 
-<p>
-user=&gt; (partition-all 3 my-coll)
+user=> (partition-all 3 my-coll)
 ((0 1 2) (3 4 5) (6))
-</p>
 
-<p>
-user=&gt; (split-at 3 my-coll)
+user=> (split-at 3 my-coll)
 [(0 1 2) (3 4 5 6)]
-</p>
 
-<p>
-user=&gt; (range)
+user=> (range)
 ;; good luck with this one! (cancel with Ctrl-c)
-</p>
 
-<p>
-user=&gt; (range 5)
+user=> (range 5)
 (0 1 2 3 4)
-</p>
 
-<p>
-user=&gt; (take 5 (range))
+user=> (take 5 (range))
 (0 1 2 3 4)
-</p>
+  </code></pre>
 </section>
+
 </section>
 <section>
-<section id="sec-41" >
+<section id="sec-40" >
 
 <h2>Higher order functions</h2>
 <p>
@@ -891,7 +842,7 @@ user=> (map full-name names)
 
 </section>
 <section>
-<section id="sec-42" >
+<section id="sec-41" >
 
 <h2>Anonymous Functions</h2>
 <p>
@@ -917,7 +868,7 @@ user=> (map #(full-name (:forename %) (:surname %)) names)
 
 </section>
 <section>
-<section id="sec-43" >
+<section id="sec-42" >
 
 <h2>Anonymous function arities</h2>
 <p>
@@ -934,7 +885,7 @@ You can refer to multiple args by %1, %2, &#x2026;
 </section>
 </section>
 <section>
-<section id="sec-44" >
+<section id="sec-43" >
 
 <h2>Other higher-order functions</h2>
 <p>
@@ -949,7 +900,7 @@ user=> (update-in {:name "Henry" :age 30} [:age] inc)
 
 </section>
 <section>
-<section id="sec-45" >
+<section id="sec-44" >
 
 <h2>Sequence-Sequence higher order functions</h2>
   <pre><code data-trim class="clojure">
@@ -971,7 +922,7 @@ See also: mapcat, remove, partition-by
 </section>
 </section>
 <section>
-<section id="sec-46" >
+<section id="sec-45" >
 
 <h2>Sequence in &gt; Something else out</h2>
   <pre><code data-trim class="clojure">
@@ -985,7 +936,7 @@ user=> (group-by even? [1 2 3 4])
 
 </section>
 <section>
-<section id="sec-47" >
+<section id="sec-46" >
 
 <h2>Namespaces</h2>
 <p>
@@ -1003,7 +954,7 @@ We can refer to symbols in other namespaces.
 </section>
 </section>
 <section>
-<section id="sec-48" >
+<section id="sec-47" >
 
 <h2>Leiningen's project.clj</h2>
   <pre><code data-trim class="clojure">
@@ -1019,7 +970,7 @@ We can refer to symbols in other namespaces.
 
 </section>
 <section>
-<section id="sec-49" >
+<section id="sec-48" >
 
 <h2>Your code goes here</h2>
 <p>
@@ -1032,7 +983,7 @@ Open up that file and remove the template function.
 </section>
 </section>
 <section>
-<section id="sec-50" >
+<section id="sec-49" >
 
 <h2>Add dependencies</h2>
   <pre><code data-trim class="clojure">
@@ -1043,7 +994,7 @@ Open up that file and remove the template function.
 
 </section>
 <section>
-<section id="sec-51" >
+<section id="sec-50" >
 
 <h2>Let's use some real data</h2>
 <p>
@@ -1056,7 +1007,7 @@ Free, JSON api that provides current weather data and forecasts.
 </section>
 </section>
 <section>
-<section id="sec-52" >
+<section id="sec-51" >
 
 <h2>Sample questions</h2>
 <ul class="org-ul">
@@ -1076,7 +1027,7 @@ Free, JSON api that provides current weather data and forecasts.
 </section>
 </section>
 <section>
-<section id="sec-53" >
+<section id="sec-52" >
 
 <h2>One I prepared earlier</h2>
 <p>
@@ -1085,7 +1036,7 @@ Free, JSON api that provides current weather data and forecasts.
 </section>
 </section>
 <section>
-<section id="sec-54" >
+<section id="sec-53" >
 
 <h2>Clojure the Parasite</h2>
 <p>
@@ -1122,7 +1073,7 @@ On the way:
 </section>
 </section>
 <section>
-<section id="sec-55" >
+<section id="sec-54" >
 
 <h2>Accessing the host environment - Clojure &amp;rarr; Java</h2>
 <pre><code data-trim class="clojure">
@@ -1140,7 +1091,7 @@ On the way:
 
 </section>
 <section>
-<section id="sec-56" >
+<section id="sec-55" >
 
 <h2>With a spoonful of sugar</h2>
 <pre><code data-trim class="clojure">
@@ -1158,7 +1109,7 @@ On the way:
 
 </section>
 <section>
-<section id="sec-57" >
+<section id="sec-56" >
 
 <h2>Recycling with 'doto'</h2>
 <pre><code data-trim class="clojure">
@@ -1182,7 +1133,7 @@ MyObject myObj = builder.build();
 
 </section>
 <section>
-<section id="sec-58" >
+<section id="sec-57" >
 
 <h2>Importing the goods</h2>
   <pre><code data-trim class="clojure">
@@ -1195,7 +1146,7 @@ MyObject myObj = builder.build();
 
 </section>
 <section>
-<section id="sec-59" >
+<section id="sec-58" >
 
 <h2>Implementing Java interfaces</h2>
 <pre><code data-trim class="clojure">

@@ -21,7 +21,7 @@ Professionally using Clojure for 18 months
 
 ... and what are you hoping to get out of these sessions?
 
-* What we'll cover
+* What we'll cover today
   
   - Getting up and running
   - Language primitives
@@ -35,16 +35,15 @@ Professionally using Clojure for 18 months
   - The ability to create your own non-trivial Clojure projects
 
 * Housekeeping
-  Experience of LISP?
-  Other functional languages?
-  What text editor?
-  Who has Java?
-  Who has leiningen?
+  - Experience of LISP?
+  - Other functional languages?
+  - What text editor?
+  - Who has Java?
+  - Who has leiningen?
 
 * Getting Set Up
 
 First, you’ll need a Java Virtual Machine, or JVM, and its associated development tools, called the JDK. This is the software which runs a Clojure program. If you’re on Windows, install Oracle JDK 1.7. If you’re on OS X or Linux, you may already have a JDK installed. In a terminal, try:
-
 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
@@ -105,7 +104,7 @@ nil
   </code></pre>
   #+END_HTML
 
-nil is the most basic value in Clojure. It represents the absence of information.
+nil is the most basic value in Clojure.
 
 * Boolean values
 
@@ -165,7 +164,7 @@ Vectors
 
 "It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures." —Alan Perlis
 
-* Deffo
+* Def
 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
@@ -188,7 +187,8 @@ user=> x
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
 user=> (1 2 3)
-ClassCastException java.lang.Long cannot be cast to clojure.lang.IFn  user/eval146 (NO_SOURCE_FILE:1)
+ClassCastException java.lang.Long cannot be cast to clojure.lang.IFn 
+  user/eval146 (NO_SOURCE_FILE:1)
   </code></pre>
   #+END_HTML
 
@@ -211,11 +211,13 @@ user=> (inc x)
   #+END_HTML
 
 * Nesting
-
+  #+BEGIN_HTML
+  <pre>
 Increment
   increment
-    the number zero
-
+    the number 
+  </pre>
+  #+END_HTML
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
 user=> (inc (inc 0))
@@ -281,6 +283,7 @@ See also: condp
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
 user=> (fn [x] (+ x 1))
+
 #<user$eval149$fn__150 user$eval149$fn__150@397d812b>
   </code></pre>
   #+END_HTML
@@ -293,6 +296,7 @@ user=> (fn [x]
          (if (even? x)
            (inc x)
            (dec x)))
+
 #<user$eval149$fn__150 user$eval149$fn__150@397d812c>
   </code></pre>
   #+END_HTML
@@ -310,8 +314,12 @@ You probably won't see this in production code...
 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
-user=> (def half (fn [number] (/ number 2)))
+user=> (def half
+         (fn [number]
+            (/ number 2)))
+
 #'user/half
+
 user=> (half 6)
 3
   </code></pre>
@@ -321,7 +329,8 @@ Creating a function and binding it to a var is so common that it has its own for
 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
-user=> (defn half [number] (/ number 2))
+user=> (defn half [number]
+          (/ number 2))
 #'user/half
   </code></pre>
   #+END_HTML
@@ -344,9 +353,11 @@ But if we try to use our earlier form with one argument, Clojure complains that 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
 user=> (half 10)
+  
+ArityException Wrong number of args (1) passed to:
+  user$half  clojure.lang.AFn.throwArity (AFn.java:437)
   </code></pre>
   #+END_HTML
-ArityException Wrong number of args (1) passed to: user$half  clojure.lang.AFn.throwArity (AFn.java:437)
 
 * Multiple Arities
 
@@ -357,8 +368,12 @@ To handle multiple arities, functions have an alternate form. Instead of an argu
 user=> (defn half
          ([]  1/2)
          ([x] (/ x 2)))
+
+#'user/half
+
 user=> (half)
 1/2
+
 user=> (half 10)
 5
   </code></pre>
@@ -375,18 +390,22 @@ user=> (defn vargs
           :y    y
           :more more-args})
 #'user/vargs
+
 user=> (vargs 1)
 
-ArityException Wrong number of args (1) passed to: user$vargs  clojure.lang.AFn.throwArity (AFn.java:437)
+ArityException Wrong number of args (1) passed to: user$vargs 
+clojure.lang.AFn.throwArity (AFn.java:437)
+
 user=> (vargs 1 2)
 {:x 1, :y 2, :more nil}
+
 user=> (vargs 1 2 3 4 5)
 {:x 1, :y 2, :more (3 4 5)}
   </code></pre>
   #+END_HTML
 * Bindings
 
-We know that symbols are names for things, and that when evaluated, Clojure replaces those symbols with their corresponding values. +, for instance, is a symbol which points to the verb #<core$_PLUS_ clojure.core$_PLUS_@12992c>.
+We know that symbols are names for things, and that when evaluated, Clojure replaces those symbols with their corresponding values.
 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
@@ -394,19 +413,13 @@ user=> +
 #<core$_PLUS_ clojure.core$_PLUS_@12992c>
   </code></pre>
   #+END_HTML
-When you try to use a symbol which has no defined meaning, Clojure refuses:
+
+We can create names which are locally scoped.
 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
-user=> cats
-  </code></pre>
-  #+END_HTML
-CompilerException java.lang.RuntimeException: Unable to resolve symbol: cats in this context, compiling:(NO_SOURCE_PATH:0:0)
-But we can define a meaning for a symbol within a specific expression, using let.
-
-  #+BEGIN_HTML
-  <pre><code data-trim class="clojure">
-user=> (let [cats 5] (str "I have " cats " cats."))
+user=> (let [cats 5]
+          (str "I have " cats " cats."))
 "I have 5 cats."
   </code></pre>
   #+END_HTML
@@ -416,7 +429,8 @@ Let bindings apply only within the let expression itself. They also override any
 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
-user=> (let [+ -] (+ 2 3))
+user=> (let [+ -]
+         (+ 2 3))
 -1
   </code></pre>
   #+END_HTML
@@ -462,7 +476,7 @@ user=> (:a my-map)
 1
   </code></pre>
   #+END_HTML
-* Destructuring 1
+* Destructuring
 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
@@ -474,16 +488,6 @@ user=> (let [a (:a my-map)
          (+ a b))
 3
 
-user=> (let [a (:a my-map)
-             b (:b my-map)]
-         (+ a b))
-3
-  </code></pre>
-  #+END_HTML
-* Destructuring 2
-
-  #+BEGIN_HTML
-  <pre><code data-trim class="clojure">
 user=> (let [{a :a b :b} my-map]
          (+ a b))
 3
@@ -493,7 +497,7 @@ user=> (let [{:keys [a b]} my-map]
 3
   </code></pre>
   #+END_HTML
-* Destructuring 3
+* Nested Destructuring 
   #+BEGIN_HTML
   <pre><code data-trim class="clojure">
 user=> (let [{:keys [c]} my-map
@@ -511,6 +515,8 @@ user=> (let [{[c1 c2 c3] :c} my-map]
 
 Working with maps:
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def my-map {:a 1 :b 2})
 #'user/my-map
 
@@ -522,11 +528,14 @@ user=> (dissoc my-map :a)
 
 user=> my-map
 {:a 1, :b 2}
-
+  </code></pre>
+  #+END_HTML
 * A brief tour of clojure.core
 
 Working with maps:
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def my-map {:a 1 
                     :b 2 
                     :c {:d 4 
@@ -541,9 +550,11 @@ user=> (vals my-map)
 
 user=> (assoc-in my-map [:c :f] 6)
 {:a 1, :c {:f 6, :d 4, :e 5}, :b 2}
-
+  </code></pre>
+  #+END_HTML
 * Vector functions
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def my-coll [2 3 1 5 6 4 0])
 #'user/my-coll
 
@@ -561,9 +572,11 @@ user=> (conj my-coll 7)
 
 user=> my-coll
 [2 3 1 5 6 4 0]
-
+  </code></pre>
+  #+END_HTML
 * Vector functions
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def my-coll [2 3 1 5 6 4 0])
 #'user/my-coll
 
@@ -578,13 +591,15 @@ user=> (zipmap [:a :b :c :d :e :f] my-coll)
 
 user=> (frequencies "Hello world!")
 {\space 1, \! 1, \d 1, \e 1, \H 1, \l 3, \o 2, \r 1, \w 1}
-
+  </code></pre>
+  #+END_HTML
 See also: concat, interleave, cons, last, butlast
 
 * Sheer laziness
 
 While Clojure is technically eager by default, most of the functions on collections operate lazily:
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def my-coll [0 1 2 3 4 5 6])
 #'user/my-coll
 
@@ -611,7 +626,8 @@ user=> (range 5)
 
 user=> (take 5 (range))
 (0 1 2 3 4)
-
+  </code></pre>
+  #+END_HTML
 * Higher order functions
 
 Functions that accept or return functions
@@ -715,9 +731,12 @@ In the REPL we get a 'user' namespace. In larger projects we like to split our c
 
 We can refer to symbols in other namespaces.
 
+#+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 (ns some.namespace
   (:require [other.namespace :as blah]))
-
+  </code></pre>
+  #+END_HTML
 * Leiningen's project.clj
 
   #+BEGIN_HTML
