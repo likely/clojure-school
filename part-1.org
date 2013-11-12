@@ -41,15 +41,20 @@ Professionally using Clojure for 18 months
 
 First, you’ll need a Java Virtual Machine, or JVM, and its associated development tools, called the JDK. This is the software which runs a Clojure program. If you’re on Windows, install Oracle JDK 1.7. If you’re on OS X or Linux, you may already have a JDK installed. In a terminal, try:
 
-#+BEGIN_SRC clojure
+
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 which javac
-#+END_SRC
+  </code></pre>
+  #+END_HTML
 
 If you see something like
 
-#+BEGIN_SRC clojure
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 /usr/bin/javac
-#+END_SRC
+  </code></pre>
+  #+END_HTML
 
 Then you're good to go
 
@@ -89,24 +94,30 @@ With LISPs, you bring the system up and develop it from the inside.
 
 * Jumping inside
 
-#+BEGIN_SRC clojure
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> nil
 nil
-#+END_SRC
+  </code></pre>
+  #+END_HTML
 
 nil is the most basic value in Clojure. It represents the absence of information.
 
 * Boolean values
 
-#+BEGIN_SRC clojure
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> true
 true
 user=> false
 false
-#+END_SRC
+  </code></pre>
+  #+END_HTML
 
 * Basic Types
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 0
 -42
 1.2e-5
@@ -114,17 +125,31 @@ false
 "Hi there!"
 :keywords
 #"\d+"
+  </code></pre>
+  #+END_HTML
 
 * Collection Types
 
 Maps
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 {:a 1 :b 2}
+  </code></pre>
+  #+END_HTML
 
 Sets
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 #{1 2 3}
+  </code></pre>
+  #+END_HTML
 
 Vectors
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 [1 2 3]
+  </code></pre>
+  #+END_HTML
 
 ... that's it!
 
@@ -132,20 +157,30 @@ Vectors
 
 * Deffo
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def x 3)
 #'user/x
+  </code></pre>
+  #+END_HTML
 
 We've defined a var in the 'user' namespace and can refer to it:
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> x
 3
+  </code></pre>
+  #+END_HTML
 
 * Lists
 
-#+BEGIN_SRC clojure
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (1 2 3)
 ClassCastException java.lang.Long cannot be cast to clojure.lang.IFn  user/eval146 (NO_SOURCE_FILE:1)
-#+END_SRC
+  </code></pre>
+  #+END_HTML
 
 * Wha happen?
 
@@ -155,11 +190,15 @@ The first element in the list is always the function to be invoked, with any rem
 
 * Function Invocation
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (inc 0)
 1
 
 user=> (inc x)
 4
+  </code></pre>
+  #+END_HTML
 
 * Nesting
 
@@ -167,23 +206,30 @@ Increment
   increment
     the number zero
 
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (inc (inc 0))
 2
+  </code></pre>
+  #+END_HTML
 
 * Evaluation
 
 Every list starts with a verb. Parts of a list are evaluated from left to right. Innermost lists are evaluated before outer lists.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 (+ 1 (- 5 2) (+ 3 4))
 (+ 1 3       (+ 3 4))
 (+ 1 3       7)
 11
-
-* Ifs, buts...
+  </code></pre>
+  #+END_HTML
 
 * Control structures:
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (if (> 3 2) "Higher" "Lower")
 "Higher"
 
@@ -195,11 +241,15 @@ user=> (when (> 3 2)
 	"Higher")
 3 is greater than 2
 "Higher"
+  </code></pre>
+  #+END_HTML
 
 See also: `if-not` and `when-not`
 
 * More conditionals
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (case (inc 3)
          3 "Uh oh"
          4 "Yep!"
@@ -212,59 +262,88 @@ user=> (cond
 	 (zero? (- (* 4 2) 8) "This is true, but we won't get here"
          :otherwise "None of the above."
 "Cond picks the first correct case"
+  </code></pre>
+  #+END_HTML
 
 See also: condp
 
 * Having fn yet?
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (fn [x] (+ x 1))
 #<user$eval149$fn__150 user$eval149$fn__150@397d812b>
+  </code></pre>
+  #+END_HTML
 
 We've created a function!
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (fn [x]
          (if (even? x)
            (inc x)
            (dec x)))
 #<user$eval149$fn__150 user$eval149$fn__150@397d812c>
-
+  </code></pre>
+  #+END_HTML
 * Usage
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> ((fn [x] (+ x 1)) 10)
 11
-
+  </code></pre>
+  #+END_HTML
 You probably won't see this in production code...
 
 * Defn
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def half (fn [number] (/ number 2)))
 #'user/half
 user=> (half 6)
 3
+  </code></pre>
+  #+END_HTML
+
 Creating a function and binding it to a var is so common that it has its own form: defn, short for def fn.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (defn half [number] (/ number 2))
 #'user/half
+  </code></pre>
+  #+END_HTML
 
 * Function Arity
 
 Functions don’t have to take an argument. We’ve seen functions which take zero arguments, like (+).
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (defn half [] 1/2)
 #'user/half
 user=> (half)
 1/2
+  </code></pre>
+  #+END_HTML
 
 But if we try to use our earlier form with one argument, Clojure complains that the arity–the number of arguments to the function–is incorrect.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (half 10)
-
+  </code></pre>
+  #+END_HTML
 ArityException Wrong number of args (1) passed to: user$half  clojure.lang.AFn.throwArity (AFn.java:437)
 
 * Multiple Arities
 
 To handle multiple arities, functions have an alternate form. Instead of an argument vector and a body, one provides a series of lists, each of which starts with an argument vector, followed by the body.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (defn half
          ([]  1/2)
          ([x] (/ x 2)))
@@ -272,12 +351,14 @@ user=> (half)
 1/2
 user=> (half 10)
 5
-
+  </code></pre>
+  #+END_HTML
 
 * Variable Arities
 
 Some functions can take any number of arguments. For that, Clojure provides &, which slurps up all remaining arguments as a list:
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (defn vargs
          [x y & more-args]
          {:x    x
@@ -291,60 +372,90 @@ user=> (vargs 1 2)
 {:x 1, :y 2, :more nil}
 user=> (vargs 1 2 3 4 5)
 {:x 1, :y 2, :more (3 4 5)}
-
+  </code></pre>
+  #+END_HTML
 * Bindings
 
 We know that symbols are names for things, and that when evaluated, Clojure replaces those symbols with their corresponding values. +, for instance, is a symbol which points to the verb #<core$_PLUS_ clojure.core$_PLUS_@12992c>.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> +
 #<core$_PLUS_ clojure.core$_PLUS_@12992c>
+  </code></pre>
+  #+END_HTML
 When you try to use a symbol which has no defined meaning, Clojure refuses:
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> cats
-
+  </code></pre>
+  #+END_HTML
 CompilerException java.lang.RuntimeException: Unable to resolve symbol: cats in this context, compiling:(NO_SOURCE_PATH:0:0)
 But we can define a meaning for a symbol within a specific expression, using let.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (let [cats 5] (str "I have " cats " cats."))
 "I have 5 cats."
-
+  </code></pre>
+  #+END_HTML
 * Bindings are local
 
 Let bindings apply only within the let expression itself. They also override any existing definitions for symbols at that point in the program. For instance, we can redefine addition to mean subtraction, for the duration of a let:
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (let [+ -] (+ 2 3))
 -1
+  </code></pre>
+  #+END_HTML
 But that definition doesn’t apply outside the let:
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (+ 2 3)
-5
+5 
+  </code></pre>
+  #+END_HTML
 
 * Bindings can be composed
 
 We can also provide multiple bindings. Since Clojure doesn’t care about spacing, alignment, or newlines, I’ll write this on multiple lines for clarity.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (let [person   "joseph"
              num-cats 186]
          (str person " has " num-cats " cats!"))
 "joseph has 186 cats!"
-
+  </code></pre>
+  #+END_HTML
 When multiple bindings are given, they are evaluated in order. Later bindings can use previous bindings.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (let [cats 3
              legs (* 4 cats)]
          (str legs " legs all together"))
 "12 legs all together"
-
+  </code></pre>
+  #+END_HTML
 * Keywords as functions
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def my-map {:a 1 :b 2})
 #'user/my-map
 
 user=> (:a my-map)
 1
+  </code></pre>
+  #+END_HTML
+* Destructuring 1
 
-* Destructuring
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def my-map {:a 1 :b 2 :c [3 4 5]})
 #'user/my-map
 
@@ -357,7 +468,12 @@ user=> (let [a (:a my-map)
              b (:b my-map)]
          (+ a b))
 3
+  </code></pre>
+  #+END_HTML
+* Destructuring 2
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (let [{a :a b :b} my-map]
          (+ a b))
 3
@@ -365,7 +481,11 @@ user=> (let [{a :a b :b} my-map]
 user=> (let [{:keys [a b]} my-map]
          (+ a b))
 3
-
+  </code></pre>
+  #+END_HTML
+* Destructuring 3
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (let [{:keys [c]} my-map
              [c1 c2 c3] c]
          (+ c1 c2 c3))
@@ -375,8 +495,8 @@ user=> (let [{[c1 c2 c3] :c} my-map]
          (+ c1 c2 c3))
 12
 
-
-* The sequence core library
+  </code></pre>
+  #+END_HTML
 * A brief tour of clojure.core
 
 Map functions
@@ -412,6 +532,8 @@ range
 
 Functions that accept or return functions
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def names [{:forename "Henry" :surname "Garner"}
                    {:forename "James" :surname "Henderson"}])
 #'user/names
@@ -426,10 +548,14 @@ user=> (full-name (first names))
 user=> (map full-name names)
 ["Henry Garner" "James Henderson"]
 
+  </code></pre>
+  #+END_HTML
 * Anonymous Functions
 
 Used where you have a case for a single-use function that doesn't warrant a name.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 user=> (def names [{:forename "Henry" :surname "Garner"}
                    {:forename "James" :surname "Henderson"}])
 #'user/names
@@ -443,31 +569,62 @@ user=> (map (fn [x] (full-name (:forename x) (:surname x))) names)
 ;; Equivalent to
 
 user=> (map #(full-name (:forename %) (:surname %)) names)
-
+  </code></pre>
+  #+END_HTML
 * Anonymous function arities
 
 You can refer to multiple args by %1, %2, ...
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 
 (fn [x y] (+ x y))
 
 ;; Equivalent to
 
 #(+ %1 %2)
-
+  </code></pre>
+  #+END_HTML
 
 * Other higher-order functions
 
-sort-by
-map
-mapcat
-filter
-remove
-reduce
-partition-by
-group-by
-update-in
+Higher order functions can make use of functions.
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
+user=> (update-in {:name "Henry" :age 30} [:age] inc)
+{:name "Henry" :age 31}
+  </code></pre>
+  #+END_HTML
+* Sequence-Sequence higher order functions
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
+user=> (map inc [1 2 3 4])
+(2 3 4 5)
+
+user=> (filter even? [1 2 3 4 5 6])
+(2 4 6)
+
+user=> (sort-by count ["bb" "aaa" "c"]
+("c" "bb" "aaa")
+
+user=> (sort-by first > [[1 2] [2 2] [3 3]])  
+([3 3] [2 2] [1 2])
+  </code></pre>
+  #+END_HTML
+See also: mapcat, remove, partition-by
+
+* Sequence in > Something else out 
+
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
+user=> (reduce + [1 2 3])
+6
+
+user=> (group-by even? [1 2 3 4])
+{false [1 3], true [2 4]}
+  </code></pre>
+  #+END_HTML
 * Namespaces
 
 In the REPL we get a 'user' namespace. In larger projects we like to split our code out into more namespaces.
@@ -479,6 +636,8 @@ We can refer to symbols in other namespaces.
 
 * Leiningen's project.clj
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 (defproject weather "0.1.0-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
@@ -486,7 +645,8 @@ We can refer to symbols in other namespaces.
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [clj-http "0.7.7"]])
-
+  </code></pre>
+  #+END_HTML
 * Your code goes here
 
   src/weather/core.clj
@@ -495,9 +655,12 @@ Open up that file and remove the template function.
 
 * Add dependencies
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 (ns weather.core
   (:require [clj-http.client :as http]))
-
+  </code></pre>
+  #+END_HTML
 * Let's use some real data
 
 http://openweathermap.org/API
@@ -536,6 +699,8 @@ On the way:
 
 * Accessing the host environment - Clojure &rarr; Java
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
   (let [date (new org.joda.DateTime 2013 11 12)]
     (.getDayOfWeek date))
 
@@ -545,9 +710,12 @@ On the way:
     (. date (getDayOfWeek))
 
   (System/currentTimeMillis)
-
+  </code></pre>
+  #+END_HTML
 * With a spoonful of sugar
 
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
   ;; for date.withHourOfDay(12).withMinuteOfHour(53);
 
   ;; rather than
@@ -557,34 +725,45 @@ On the way:
   ;; we can write
 
   (.. date (withHourOfDay 12) (withMinuteOfHour 53))
-
+  </code></pre>
+  #+END_HTML
 * Recycling with 'doto'
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
   (let [my-obj (.. (doto (MyObjectBuilder.)  
                      (.setValue 8) 
                      (.setString "Hello!")
                      (.setOtherThing (+ 145.2 13.25)))
                    (build))]
     my-obj)
+      </code></pre>
+  #+END_HTML
 
-  ;; equivalent to:
-
+    #+BEGIN_HTML
+    <pre><code data-trim class="java">
+     ;; equivalent to:
   MyObjectBuilder builder = new MyObjectBuilder();
   builder.setValue(8);
   builder.setString("Hello!");
   builder.setOtherThing(145.2 + 13.25);
   MyObject myObj = builder.build();
-
+  </code></pre>
+  #+END_HTML
 * Importing the goods
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
 (ns your-ns
   (:require [your-clj.namespace :refer [your-fn]])
   (:import [java.util UUID Date Random Currency]
            [org.joda.time DateTime Period Interval]))
-
+  </code></pre>
+  #+END_HTML
 * Implementing Java interfaces
-
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
   (.addActionListener button
                       (reify ActionListener
                         (actionPerformed [this e]
                           (prn "Got action:" e))))
+  </code></pre>
+  #+END_HTML
