@@ -122,8 +122,14 @@ false
 -42
 1.2e-5
 1/3
+
 "Hi there!"
+
+\space
+\E
+
 :keywords
+
 #"\d+"
   </code></pre>
   #+END_HTML
@@ -499,34 +505,108 @@ user=> (let [{[c1 c2 c3] :c} my-map]
   #+END_HTML
 * A brief tour of clojure.core
 
-Map functions
-assoc
-dissoc
-keys
-vals
-get
-assoc-in
+Working with maps:
 
+user=> (def my-map {:a 1 :b 2})
+#'user/my-map
+
+user=> (assoc my-map :c 3)
+{:a 1, :c 3, :b 2}
+
+user=> (dissoc my-map :a)
+{:b 2}
+
+user=> my-map
+{:a 1, :b 2}
+
+* A brief tour of clojure.core
+
+Working with maps:
+
+user=> (def my-map {:a 1 
+                    :b 2 
+                    :c {:d 4 
+                        :e 5}})
+#'user/my-map
+
+user=> (keys my-map)
+(:a :c :b)
+
+user=> (vals my-map)
+(1 {:d 4, :e 5} 2)
+
+user=> (assoc-in my-map [:c :f] 6)
+{:a 1, :c {:f 6, :d 4, :e 5}, :b 2}
 
 * Vector functions
 
-distinct
-first
-second
-nth
-last
-reverse
-sort
-conj cons concat interleave interpose
-zipmap
+user=> (def my-coll [2 3 1 5 6 4 0])
+#'user/my-coll
+
+user=> (first my-coll)
+2
+
+user=> (second my-coll)
+3
+
+user=> (nth my-coll 4)
+6
+
+user=> (conj my-coll 7)
+[2 3 1 5 6 4 0 7]
+
+user=> my-coll
+[2 3 1 5 6 4 0]
+
+* Vector functions
+
+user=> (def my-coll [2 3 1 5 6 4 0])
+#'user/my-coll
+
+user=> (sort my-coll)
+(0 1 2 3 4 5 6)
+
+user=> (interpose -1 my-coll)
+(2 -1 3 -1 1 -1 5 -1 6 -1 4 -1 0)
+
+user=> (zipmap [:a :b :c :d :e :f] my-coll)
+{:f 4, :e 6, :d 5, :c 1, :b 3, :a 2}
+
+user=> (frequencies "Hello world!")
+{\space 1, \! 1, \d 1, \e 1, \H 1, \l 3, \o 2, \r 1, \w 1}
+
+See also: concat, interleave, cons, last, butlast
 
 * Sheer laziness
 
-take
-drop
-partition partition-all
-split-at
-range
+While Clojure is technically eager by default, most of the functions on collections operate lazily:
+
+user=> (def my-coll [0 1 2 3 4 5 6])
+#'user/my-coll
+
+user=> (take 3 my-coll)
+(0 1 2)
+
+user=> (drop 2 my-coll)
+(2 3 4 5 6)
+
+user=> (partition 3 my-coll)
+((0 1 2) (3 4 5))
+
+user=> (partition-all 3 my-coll)
+((0 1 2) (3 4 5) (6))
+
+user=> (split-at 3 my-coll)
+[(0 1 2) (3 4 5 6)]
+
+user=> (range)
+;; good luck with this one! (cancel with Ctrl-c)
+
+user=> (range 5)
+(0 1 2 3 4)
+
+user=> (take 5 (range))
+(0 1 2 3 4)
 
 * Higher order functions
 
