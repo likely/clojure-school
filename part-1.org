@@ -452,6 +452,11 @@ user=> (interpose -1 my-coll)
 user=> (zipmap [:a :b :c :d :e :f] my-coll)
 {:f 4, :e 6, :d 5, :c 1, :b 3, :a 2}
 
+user=> (frequencies "Hello world!")
+{\space 1, \! 1, \d 1, \e 1, \H 1, \l 3, \o 2, \r 1, \w 1}
+
+See also: concat, interleave, cons, last, butlast
+
 * Sheer laziness
 
 While Clojure is technically eager by default, most of the functions on collections operate lazily:
