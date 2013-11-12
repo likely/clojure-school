@@ -443,6 +443,21 @@ We can refer to symbols in other namespaces.
 
 
 
+* Let's use some real data
+
+http://openweathermap.org/API
+
+Free, JSON api that provides current weather data and forecasts.
+
+* Sample questions
+
+- How many cities called London are there? (hint: find?q=London)
+- What are the lat/long positions of all the Londons?
+- What has been the average temperature of London, UK for the last 5 days? (hint: forecast?q=London)
+- What has been the average temperature of London, UK for the last 10 days?
+- On how many of the last 10 days has it been cloudy?
+- On how many of the last 10 days has it not been cloudy?
+
 * That's It!
 
 The entire grammar of Lisp: the structure for every expression in the language. We transform expressions by substituting meanings for symbols, and obtain some result. This is the core of the Lambda Calculus, and it is the theoretical basis for almost all computer languages. Ruby, Javascript, C, Haskell; all languages express the text of their programs in different ways, but internally all construct a tree of expressions. Lisp simply makes it explicit.
@@ -803,6 +818,5 @@ Demonstration serializable transactions
 
 HTTP client / http server
 Ring/Compojure/Hiccup
-
 
 
