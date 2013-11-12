@@ -8,7 +8,7 @@
 #+REVEAL_TRANS: fade
 
 * Who is already a programmer?
-
+ 
 * Experience of LISP?
 
 * What text editor?
@@ -17,7 +17,11 @@ Emacs
 Vim
 Sublime
 Textmate
+Eclipse
+IntelliJ
 
+
+* Who has Java?
 
 * Getting Set Up
 
@@ -44,6 +48,8 @@ curl -O https://raw.github.com/technomancy/leiningen/stable/bin/lein
 chmod a+x lein
 #+END_SRC
 
+Windows users: http://leiningen.org/#install
+
 #+BEGIN_SRC bash
 cd
 lein new scratch
@@ -53,7 +59,7 @@ lein new scratch
 export PATH="$PATH":~/bin
 #+END_SRC
 
-* The structure of programs
+* REPL
 
 #+BEGIN_SRC bash
 lein repl
@@ -61,7 +67,13 @@ lein repl
 
 This is an interactive Clojure environment called a REPL, for “Read, Evaluate, Print Loop”. It’s going to read a program we enter, run that program, and print the results. REPLs give you quick feedback, so they’re a great way to explore a program interactively, run tests, and prototype new ideas.
 
-* The simplest program
+* REPL
+
+With most languages, you write the system from the outside.
+
+With LISPs, you bring the system up and develop it from the inside.
+
+* Jumping inside
 
 #+BEGIN_SRC clojure
 user=> nil
@@ -81,71 +93,64 @@ false
 
 true and false are a pair of special values called Booleans. They mean exactly what you think: whether a statement is true or false. true, false, and nil form the three poles of the Lisp logical system.
 
-* OTher values
-
-Numbers
+* Basic Types
 
 0
 -42
 1.2e-5
 1/3
 
-Strings
 "Hi there!"
 
-* Functions
-
-inc
-
-This is a verb inc, short for increment. Specifically inc is a symbol which points to a verb. Just like run is a name for the concept of running.
-
-Unlike the number 0, or the string “hi”, symbols are references to other values. when Clojure evaluates a symbol, it looks up that symbol’s meaning. Look up inc, and you get #<core$inc clojure.core$inc@6f7ef41c>
+:keywords
 
 
-* Quoting
+* Collection Types
 
-Can we refer to a symbol directly, rather than looking up its meaning?
+Maps
 
-user=> 'inc
-inc
+{:a 1 :b 2}
 
-The single quote ' escapes an expression. It says “Rather than evaluating this text, simply return the text itself, unchanged. Quote a symbol, get a symbol. Quote a number, get a number. Quote anything, and get it back exactly as it came in.
+Sets
+#{1 2 3}
+
+Vectors
+[1 2 3]
+
+... that's it!
+
+"It is better to have 100 functions operate on one data structure than 10 functions on 10 data structures." —Alan Perlis
+
+* Deffo
+
+user=> (def x 3)
+#'user/x
+
+We've defined a var in the 'user' namespace and can refer to it:
+
+user=> x
+3
 
 * Lists
 
-Lisp originally stood for LISt Processing, and lists are still at the core of the language. This list contains three elements: the numbers 1, 2, and 3. Lists can contain anything: numbers, strings, even other lists:
+#+BEGIN_SRC clojure
+user=> (1 2 3)
+ClassCastException java.lang.Long cannot be cast to clojure.lang.IFn  user/eval146 (NO_SOURCE_FILE:1)
+#+END_SRC
 
-user=> '(nil "hi")
-(nil "hi")
+* Wha happen?
 
-user=> '(1 (2 (3 ())))
-(1 (2 (3 ())))
+The REPL sees a list and treats it as a function invocation.
 
-* Trees
+The first element in the list is always the function to be invoked, with any remaining elements passed as arguments.
 
-You could think of this structure as a tree–which is a provocative idea, because languages are like trees too: sentences are comprised of clauses, which can be nested, and each clause may have subjects modified by adjectives, and verbs modified by adverbs, and so on. "Lindsay, my best friend, took the dog which we found together at the pound on fourth street, for a walk with her mother Michelle.”
-
-Took
-  Lindsay
-    my best friend
-  the dog
-    which we found together
-      at the pound
-        on fourth street
-    for a walk
-      with her mother
-        Michelle
-
-
-* Syntax Trees
-
-clj=> '(inc 0)
-(inc 0)
-
-A basic sentence. Remember, since it’s quoted, we’re talking about the tree, the text, the expression, by itself. Absent interpretation. If we remove the single-quote, Clojure will interpret the expression:
+* Function Invocation
 
 user=> (inc 0)
 1
+
+user=> (inc x)
+4
 
 * Nesting
 
@@ -157,7 +162,6 @@ Increment
 user=> (inc (inc 0))
 2
 
-
 * Evaluation
 
 Every list starts with a verb. Parts of a list are evaluated from left to right. Innermost lists are evaluated before outer lists.
@@ -166,6 +170,281 @@ Every list starts with a verb. Parts of a list are evaluated from left to right.
 (+ 1 3       (+ 3 4))
 (+ 1 3       7)
 11
+
+* Having fn yet?
+
+user=> (fn [x] (+ x 1))
+#<user$eval149$fn__150 user$eval149$fn__150@397d812b>
+
+We've created a function!
+
+
+* Usage
+
+user=> ((fn [x] (+ x 1)) 10)
+11
+
+You probably won't see this in production code...
+
+* Defn
+
+user=> (def half (fn [number] (/ number 2)))
+#'user/half
+user=> (half 6)
+3
+Creating a function and binding it to a var is so common that it has its own form: defn, short for def fn.
+
+user=> (defn half [number] (/ number 2))
+#'user/half
+
+* Function Arity
+
+Functions don’t have to take an argument. We’ve seen functions which take zero arguments, like (+).
+
+user=> (defn half [] 1/2)
+#'user/half
+user=> (half)
+1/2
+But if we try to use our earlier form with one argument, Clojure complains that the arity–the number of arguments to the function–is incorrect.
+
+user=> (half 10)
+
+ArityException Wrong number of args (1) passed to: user$half  clojure.lang.AFn.throwArity (AFn.java:437)
+
+* Multiple Arities
+
+To handle multiple arities, functions have an alternate form. Instead of an argument vector and a body, one provides a series of lists, each of which starts with an argument vector, followed by the body.
+
+user=> (defn half
+         ([]  1/2)
+         ([x] (/ x 2)))
+user=> (half)
+1/2
+user=> (half 10)
+5
+
+
+
+* Variable Arities
+
+Some functions can take any number of arguments. For that, Clojure provides &, which slurps up all remaining arguments as a list:
+
+user=> (defn vargs
+         [x y & more-args]
+         {:x    x
+          :y    y
+          :more more-args})
+#'user/vargs
+user=> (vargs 1)
+
+ArityException Wrong number of args (1) passed to: user$vargs  clojure.lang.AFn.throwArity (AFn.java:437)
+user=> (vargs 1 2)
+{:x 1, :y 2, :more nil}
+user=> (vargs 1 2 3 4 5)
+{:x 1, :y 2, :more (3 4 5)}
+
+
+
+* Bindings
+
+We know that symbols are names for things, and that when evaluated, Clojure replaces those symbols with their corresponding values. +, for instance, is a symbol which points to the verb #<core$_PLUS_ clojure.core$_PLUS_@12992c>.
+
+user=> +
+#<core$_PLUS_ clojure.core$_PLUS_@12992c>
+When you try to use a symbol which has no defined meaning, Clojure refuses:
+
+user=> cats
+
+CompilerException java.lang.RuntimeException: Unable to resolve symbol: cats in this context, compiling:(NO_SOURCE_PATH:0:0)
+But we can define a meaning for a symbol within a specific expression, using let.
+
+user=> (let [cats 5] (str "I have " cats " cats."))
+"I have 5 cats."
+
+* Bindings are local
+
+Let bindings apply only within the let expression itself. They also override any existing definitions for symbols at that point in the program. For instance, we can redefine addition to mean subtraction, for the duration of a let:
+
+user=> (let [+ -] (+ 2 3))
+-1
+But that definition doesn’t apply outside the let:
+
+user=> (+ 2 3)
+5
+
+* Bindings can be composed
+
+We can also provide multiple bindings. Since Clojure doesn’t care about spacing, alignment, or newlines, I’ll write this on multiple lines for clarity.
+
+user=> (let [person   "joseph"
+             num-cats 186]
+         (str person " has " num-cats " cats!"))
+"joseph has 186 cats!"
+When multiple bindings are given, they are evaluated in order. Later bindings can use previous bindings.
+
+user=> (let [cats 3
+             legs (* 4 cats)]
+         (str legs " legs all together"))
+"12 legs all together"
+
+* Keywords as functions
+* Destructuring
+
+user=> (def my-map {:a 1 :b 2 :c [3 4 5]})
+#'user/my-map
+
+user=> (let [a (:a my-map)
+             b (:b my-map)]
+         (+ a b))
+3
+
+user=> (let [a (:a my-map)
+             b (:b my-map)]
+         (+ a b))
+3
+
+user=> (let [{a :a b :b} my-map]
+         (+ a b))
+3
+
+user=> (let [{:keys [a b]} my-map]
+         (+ a b))
+3
+
+user=> (let [{:keys [c]} my-map
+             [c1 c2 c3] c]
+         (+ c1 c2 c3))
+12
+
+user=> (let [{[c1 c2 c3] :c} my-map]
+         (+ c1 c2 c3))
+12
+
+* Functions
+
+We saw in chapter one that Clojure evaluates lists by substituting some other value in their place:
+
+user=> (inc 1)
+2
+inc takes any number, and is replaced by that number plus one. That sounds an awful lot like a let:
+
+user=> (let [x 1] (+ x 1))
+2
+If we bound x to 5 instead of 1, this expression would evaluate to 6. We can think about inc like a let expression, but without particular values provided for the symbols.
+
+(let [x] (+ x 1))
+We can’t actually evaluate this program, because there’s no value for x yet. It could be 1, or 4, or 1453. We say that x is unbound, because it has no binding to a particular value. This is the nature of the function: an expression with unbound symbols.
+
+user=> (fn [x] (+ x 1))
+#<user$eval293$fn__294 user$eval293$fn__294@663fc37>
+
+
+
+* Higher order functions
+
+Functions that accept or return functions
+
+user=> (def names [{:forename "Henry" :surname "Garner"}
+                   {:forename "James" :surname "Henderson"}])
+#'user/names
+
+user=> (defn full-name [{:keys [forename surname]}]
+         (str forename " " surname))
+#'user/full-name
+
+user=> (full-name (first names))
+"Henry Garner"
+
+user=> (map full-name names)
+["Henry Garner" "James Henderson"]
+
+* Anonymous Functions
+
+Used where you have a case for a single-use function that doesn't warrant a name.
+
+user=> (def names [{:forename "Henry" :surname "Garner"}
+                   {:forename "James" :surname "Henderson"}])
+#'user/names
+
+user=> (defn full-name [forename surname]
+         (str forename " " surname))
+#'user/full-name
+
+user=> (map (fn [x] (full-name (:forename x) (:surname x))) names)
+
+;; Equivalent to
+
+user=> (map #(full-name (:forename %) (:surname %)) names)
+
+* Anonymous function arities
+
+You can refer to multiple args by %1, %2, ...
+
+(fn [x y] (+ x y))
+
+;; Equivalent to
+
+#(+ %1 %2)
+
+* The sequence core library
+
+
+Simple
+
+distinct
+assoc
+dissoc
+first
+second
+nth
+last
+reverse
+sort
+keys
+vals
+get
+conj cons concat interleave interpose
+zipmap
+
+
+Lazy
+
+take
+drop
+partition partition-all
+split-at
+range
+
+Higher Order
+
+sort-by
+map
+mapcat
+filter
+remove
+reduce
+partition-by
+group-by
+take
+
+* Namespaces
+
+In the REPL we get a 'user' namespace. In larger projects we like to split our code out into more namespaces.
+
+We can refer to symbols in other namespaces.
+
+(ns some.namespace
+  (:require [other.namespace :as blah]))
+
+
+* Live Emacs Demo
+
+
+
+
+
+
+
 
 * That's It!
 
@@ -229,7 +508,6 @@ user=> (boolean nil)
 false
 user=> (boolean 0)
 true
-
 
 * Logic
 
@@ -360,68 +638,8 @@ Or the Gini coefficients of nations, as measured over time:
 {:title "Chocolate chip cookies"
 {"Afghanistan" {2008 27.8}
  "Indonesia"   {2008 34.1 2010 35.6 2011 38.1}
- "Uruguay"     {2008 46.3 2009 46.3 2010 45.3}}
+ "Uruguay"     {2008 46.3 2009 46.3 2010 45.3}}}
 
-
-* Bindings
-
-We know that symbols are names for things, and that when evaluated, Clojure replaces those symbols with their corresponding values. +, for instance, is a symbol which points to the verb #<core$_PLUS_ clojure.core$_PLUS_@12992c>.
-
-user=> +
-#<core$_PLUS_ clojure.core$_PLUS_@12992c>
-When you try to use a symbol which has no defined meaning, Clojure refuses:
-
-user=> cats
-
-CompilerException java.lang.RuntimeException: Unable to resolve symbol: cats in this context, compiling:(NO_SOURCE_PATH:0:0)
-But we can define a meaning for a symbol within a specific expression, using let.
-
-user=> (let [cats 5] (str "I have " cats " cats."))
-"I have 5 cats."
-
-* Bindings are local
-
-Let bindings apply only within the let expression itself. They also override any existing definitions for symbols at that point in the program. For instance, we can redefine addition to mean subtraction, for the duration of a let:
-
-user=> (let [+ -] (+ 2 3))
--1
-But that definition doesn’t apply outside the let:
-
-user=> (+ 2 3)
-5
-
-* Bindings can be composed
-
-We can also provide multiple bindings. Since Clojure doesn’t care about spacing, alignment, or newlines, I’ll write this on multiple lines for clarity.
-
-user=> (let [person   "joseph"
-             num-cats 186]
-         (str person " has " num-cats " cats!"))
-"joseph has 186 cats!"
-When multiple bindings are given, they are evaluated in order. Later bindings can use previous bindings.
-
-user=> (let [cats 3
-             legs (* 4 cats)]
-         (str legs " legs all together"))
-"12 legs all together"
-
-* Functions
-
-We saw in chapter one that Clojure evaluates lists by substituting some other value in their place:
-
-user=> (inc 1)
-2
-inc takes any number, and is replaced by that number plus one. That sounds an awful lot like a let:
-
-user=> (let [x 1] (+ x 1))
-2
-If we bound x to 5 instead of 1, this expression would evaluate to 6. We can think about inc like a let expression, but without particular values provided for the symbols.
-
-(let [x] (+ x 1))
-We can’t actually evaluate this program, because there’s no value for x yet. It could be 1, or 4, or 1453. We say that x is unbound, because it has no binding to a particular value. This is the nature of the function: an expression with unbound symbols.
-
-user=> (fn [x] (+ x 1))
-#<user$eval293$fn__294 user$eval293$fn__294@663fc37>
 
 * Vars
 
@@ -469,61 +687,6 @@ user=> (count astronauts)
 If this seems dangerous, you’re a smart cookie. Redefining names in this way changes the meaning of expressions everywhere in a program, without warning. Expressions which relied on the value of a Var could suddenly take on new, possibly incorrect, meanings. It’s a powerful tool for experimenting at the REPL, and for updating a running program, but it can have unexpected consequences. Good Clojurists use def to set up a program initially, and only change those definitions with careful thought.
 
 Totally redefining a Var isn’t the only option. There are safer, controlled ways to change the meaning of a Var within a particular part of a program, which we’ll explore later.
-
-* Defn
-
-user=> (def half (fn [number] (/ number 2)))
-#'user/half
-user=> (half 6)
-3
-Creating a function and binding it to a var is so common that it has its own form: defn, short for def fn.
-
-user=> (defn half [number] (/ number 2))
-#'user/half
-
-* Function Arity
-
-Functions don’t have to take an argument. We’ve seen functions which take zero arguments, like (+).
-
-user=> (defn half [] 1/2)
-#'user/half
-user=> (half)
-1/2
-But if we try to use our earlier form with one argument, Clojure complains that the arity–the number of arguments to the function–is incorrect.
-
-user=> (half 10)
-
-ArityException Wrong number of args (1) passed to: user$half  clojure.lang.AFn.throwArity (AFn.java:437)
-
-* Multiple Arities
-
-To handle multiple arities, functions have an alternate form. Instead of an argument vector and a body, one provides a series of lists, each of which starts with an argument vector, followed by the body.
-
-user=> (defn half
-         ([]  1/2)
-         ([x] (/ x 2)))
-user=> (half)
-1/2
-user=> (half 10)
-5
-
-* Variable Arities
-
-Some functions can take any number of arguments. For that, Clojure provides &, which slurps up all remaining arguments as a list:
-
-user=> (defn vargs
-         [x y & more-args]
-         {:x    x
-          :y    y
-          :more more-args})
-#'user/vargs
-user=> (vargs 1)
-
-ArityException Wrong number of args (1) passed to: user$vargs  clojure.lang.AFn.throwArity (AFn.java:437)
-user=> (vargs 1 2)
-{:x 1, :y 2, :more nil}
-user=> (vargs 1 2 3 4 5)
-{:x 1, :y 2, :more (3 4 5)}
 
 * How does type work?
 
@@ -610,4 +773,39 @@ Almost every function in a programming language is made up of other, simpler fun
 * Functional Programming
 
 * Concurrency
+
+* Quoting
+
+Can we refer to a symbol directly, rather than looking up its meaning?
+
+user=> 'inc
+inc
+
+The single quote ' escapes an expression. It says “Rather than evaluating this text, simply return the text itself, unchanged. Quote a symbol, get a symbol. Quote a number, get a number. Quote anything, and get it back exactly as it came in.
+
+
+
+Core Libraries
+clojure.string
+data wrangling csv / xml / json
+
+File io / Macros
+with-open
+for
+
+lein's project.clj
+
+STM
+atoms
+refs
+agents
+promises
+delays
+
+Demonstration serializable transactions
+
+HTTP client / http server
+Ring/Compojure/Hiccup
+
+
 
