@@ -23,12 +23,16 @@ Professionally using Clojure for 18 months
 
 * What we'll cover
   
-  Getting up and running
-  Language primitives
-  Working with sequences
-  Working with higher order functions
-  Working with real data
-  Moving beyond the REPL
+  - Getting up and running
+  - Language primitives
+  - Working with sequences
+  - Working with higher order functions
+  - Working with real data
+  - Moving beyond the REPL
+
+* Where will we get to in 4 weeks?
+  
+  - The ability to create your own non-trivial Clojure projects
 
 * Housekeeping
   Experience of LISP?
