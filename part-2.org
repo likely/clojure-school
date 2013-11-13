@@ -1,0 +1,102 @@
+* One I prepared earlier
+
+  https://github.com/likely/weather
+
+* Clojure the Parasite
+
+Clojure is, by its very nature, a hosted language. 
+
+Stable:
+
+- Clojure (obviously!) - targets the JVM
+- ClojureScript - compiles to JavaScript
+
+On the way:
+
+- Clojure.NET
+- clojurescript-lua
+- clojurec
+- clojure-py
+- clojure-scheme
+
+* Accessing the host environment - Clojure &rarr; Java
+
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
+  (let [date (new org.joda.DateTime 2013 11 12)]
+    (.getDayOfWeek date))
+
+  ;; or
+
+  (let [date (org.joda.DateTime. 2013 11 12)]
+    (. date (getDayOfWeek))
+
+  (System/currentTimeMillis)
+  </code></pre>
+  #+END_HTML
+* With a spoonful of sugar
+
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
+  ;; for date.withHourOfDay(12).withMinuteOfHour(53);
+
+  ;; rather than
+
+  (.withMinuteOfHour (.withHourOfDay date 12) 53)
+
+  ;; we can write
+
+  (.. date (withHourOfDay 12) (withMinuteOfHour 53))
+  </code></pre>
+  #+END_HTML
+* Recycling with 'doto'
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
+  (let [my-obj (.. (doto (MyObjectBuilder.)  
+                     (.setValue 8) 
+                     (.setString "Hello!")
+                     (.setOtherThing (+ 145.2 13.25)))
+                   (build))]
+    my-obj)
+      </code></pre>
+  #+END_HTML
+
+    #+BEGIN_HTML
+    <pre><code data-trim class="java">
+     ;; equivalent to:
+  MyObjectBuilder builder = new MyObjectBuilder();
+  builder.setValue(8);
+  builder.setString("Hello!");
+  builder.setOtherThing(145.2 + 13.25);
+  MyObject myObj = builder.build();
+  </code></pre>
+  #+END_HTML
+* Importing the goods
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
+(ns your-ns
+  (:require [your-clj.namespace :refer [your-fn]])
+  (:import [java.util UUID Date Random Currency]
+           [org.joda.time DateTime Period Interval]))
+  </code></pre>
+  #+END_HTML
+* Implementing Java interfaces
+  #+BEGIN_HTML
+  <pre><code data-trim class="clojure">
+  (.addActionListener button
+                      (reify ActionListener
+                        (actionPerformed [this e]
+                          (prn "Got action:" e))))
+  </code></pre>
+  #+END_HTML
+
+
+
+* Macros
+* Mutability
+* STM
+* Actors
+* Refs
+* Vars
+* Introducing snake
+* Websites with ring/compojure hiccup
