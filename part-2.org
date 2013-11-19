@@ -116,6 +116,29 @@ Try changing "Hello World", code should be reloaded on browser refresh.
 
 * Requests and responses are just Clojure maps
 
+The string "Hello World" is converted into a response map automatically.
+
+* Compojure
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(ns clojureschool.handler
+  (:use compojure.core)
+  (:require [compojure.handler :as handler]
+            [compojure.route :as route]))
+
+(defroutes app-routes
+  (GET "/" [] "Hello World")
+  (route/resources "/")
+  (route/not-found "Not Found"))
+
+(def app
+  (handler/site app-routes))
+</code></pre>
+#+END_HTML
+
+Compojure provides a nice DSL for mapping requests to responses.
+
 * Exercise
 
 Update the handler to return a web page at:
@@ -298,11 +321,15 @@ abort I/O and (most of the time) unwise to retry it!
     
 We have ways around this (to be covered later)
 
-* Things to try in your REPL:
+* Exercise
 
-- Starting a thread (future) to do a long calculation
-- Creating/Reading/Updating atoms
-- Simulating multiple threads
+- Start a thread (future) to sum all the numbers to one hundred million
+
+- Create a function which appends the numbers 1-10 to a vector in an atom (hint: dotimes)
+
+- Run the function across 10 threads simultaneously and observe the output
+
+- Extra credit: write a function that confirms you have ten of each number
 
 * Clojure's other concurrency primitives:
 
@@ -436,11 +463,6 @@ Compare with:
 </code></pre>
 #+END_HTML
 
-
-* Exercise 
-
-  Write some middleware that returns a 401 status code unless ?token=123 is supplied in the url (
-
 * Useful Middleware
   e.g for JSON response
 #+BEGIN_HTML
@@ -463,7 +485,17 @@ This instructs ring to convert Clojure data structures to their JSON equivalent,
 
 Also middleware for cookies, authentication, rate limiting, compression etc...
 
+* That's it!
+
+What we've covered:
+
+- Ring, Compojure, Hiccup
+- Handlers, Routes, Requests, Responses, Middleware
+- Managing state with Atoms, Refs, Agents
+
 * Further exercises
+
+Write some middleware that returns a 401 status code unless ?token=123 is supplied in the url (
 
 Add a watcher to the counter atom that prints a message to the console every 10th visitor
 

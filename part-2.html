@@ -66,6 +66,10 @@ Definitely bedtime reading
 <li>Hiccup: provides html templating
 </li>
 </ul>
+
+<p>
+Concepts: handlers, routes, requests, responses, middleware
+</p>
 </section>
 </section>
 <section>
@@ -88,7 +92,6 @@ Note the ring key in the project map:
   :ring {:handler clojureschool.handler/app}
 </code></pre>
 </section>
-
 </section>
 <section>
 <section id="sec-6" >
@@ -148,8 +151,6 @@ Try changing "Hello World", code should be reloaded on browser refresh.
                    :body "Hello World!"})))
 </code></pre>
 </section>
-
-
 </section>
 <section>
 <section id="sec-9" >
@@ -172,12 +173,54 @@ Try changing "Hello World", code should be reloaded on browser refresh.
 <section id="sec-10" >
 
 <h2>Requests and responses are just Clojure maps</h2>
+<p>
+The string "Hello World" is converted into a response map automatically.
+</p>
 </section>
-
-
 </section>
 <section>
 <section id="sec-11" >
+
+<h2>Compojure</h2>
+<pre><code data-trim class="clojure">
+(ns clojureschool.handler
+  (:use compojure.core)
+  (:require [compojure.handler :as handler]
+            [compojure.route :as route]))
+
+(defroutes app-routes
+  (GET "/" [] "Hello World")
+  (route/resources "/")
+  (route/not-found "Not Found"))
+
+(def app
+  (handler/site app-routes))
+</code></pre>
+
+<p>
+Compojure provides a nice DSL for mapping requests to responses.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-12" >
+
+<h2>Exercise</h2>
+<p>
+Update the handler to return a web page at:
+</p>
+
+<p>
+<a href="http://localhost:3000/ping">http://localhost:3000/ping</a>
+</p>
+
+<p>
+That returns "pong".
+</p>
+</section>
+</section>
+<section>
+<section id="sec-13" >
 
 <h2>Routes</h2>
 <p>
@@ -185,14 +228,20 @@ Syntax familiar to anyone with a rails background
 </p>
 
 <pre><code data-trim class="clojure">
-  (GET "/:a/:b" [a b] ...) ;; Named params
+;; Named params
+(GET "/:a/:b" [a b] ...)
 
-  (GET "/blah/*" [] ...) ;; Catch-all
+;; Query parameters
+;; e.g. /something?a=1&b=2
+(GET "/something" [a b] ...)
+
+;; Catch-all
+(GET "/blah/*" [] ...)
 </code></pre>
 </section>
 </section>
 <section>
-<section id="sec-12" >
+<section id="sec-14" >
 
 <h2>Web templating with Hiccup</h2>
 <pre><code data-trim class="clojure">
@@ -215,37 +264,29 @@ Syntax familiar to anyone with a rails background
 
 </code></pre>
 </section>
+
 </section>
 <section>
-<section id="sec-13" >
+<section id="sec-15" >
 
-<h2>Linking to static resources</h2>
-<pre><code data-trim class="clojure">
-(ns clojureschool.handler
-  (:require [hiccup.page :refer [html5 include-css]]))
-</code></pre>
-
-<pre><code data-trim class="clojure">
-(def index-view
-  (html5
-    [:head [:title "Hiccup Website"]
-           (include-css "site.css")]
-   [:body [:h1 "Title goes here"]
-    [:ul (for [x (range 10)]
-           [:li (str "Item " x)])]]))
-</code></pre>
-<pre><code data-trim class="clojure">
-(route/resources "/")
-</code></pre>
+<h2>Exercise</h2>
 <p>
-Put your static resources in &lt;project&gt;/resources/public/
+Update the handler to return a web page at:
+</p>
+
+<p>
+<a href="http://localhost:3000/list/[list_id]?n=21">http://localhost:3000/list/[list_id]?n=21</a>
+</p>
+
+<p>
+That returns a page with "List: [list id]" in the title and a list of integers from 1 to n.
 </p>
 </section>
 </section>
 <section>
-<section id="sec-14" >
+<section id="sec-16" >
 
-<h2>Insert into the view</h2>
+<h2>Adding a visitor counter!</h2>
 <pre><code data-trim class="clojure">
 (def counter 0)
 </code></pre>
@@ -255,20 +296,16 @@ Put your static resources in &lt;project&gt;/resources/public/
   (html5
    [:head [:title "Web counter"]]
    [:body [:h1 "Web counter"]
-    [:p (str "You're visitor #" (inc counter))]]))
+    [:p (str "You're visitor number " (inc counter))]]))
 </code></pre>
 
 <p>
 How can we update the counter?
 </p>
-
-<p>
-Rich Hickey - Writing Datomic in Clojure - goto; conference 2013
-</p>
 </section>
 </section>
 <section>
-<section id="sec-15" >
+<section id="sec-17" >
 
 <h2>Thinking Functionally - Mutable State</h2>
 <p>
@@ -293,7 +330,7 @@ user=> @counter
 </section>
 </section>
 <section>
-<section id="sec-16" >
+<section id="sec-18" >
 
 <h2>Updating an atom</h2>
 <p>
@@ -310,14 +347,14 @@ user=> @counter
 </section>
 </section>
 <section>
-<section id="sec-17" >
+<section id="sec-19" >
 
 <h2>Modelling Time in Clojure</h2>
 <img src="./images/clojure-time.png" alt="clojure-time.png" />
 </section>
 </section>
 <section>
-<section id="sec-18" >
+<section id="sec-20" >
 
 <h2>Kicking off another thread</h2>
 <pre><code data-trim class="clojure">
@@ -343,7 +380,7 @@ See also: realized?, future-cancel, future-cancelled?, deref (multiple arities)
 </section>
 </section>
 <section>
-<section id="sec-19" >
+<section id="sec-21" >
 
 <h2>Why bother with atoms?</h2>
 <p>
@@ -365,7 +402,7 @@ But how?!
 </section>
 </section>
 <section>
-<section id="sec-20" >
+<section id="sec-22" >
 
 <h2>Software Transactional Memory</h2>
 <p>
@@ -380,7 +417,7 @@ that anyone reading the atoms sees consistent values.
 </section>
 </section>
 <section>
-<section id="sec-21" >
+<section id="sec-23" >
 
 <h2>I/O in transactions</h2>
 <p>
@@ -409,21 +446,26 @@ We have ways around this (to be covered later)
 </section>
 </section>
 <section>
-<section id="sec-22" >
+<section id="sec-24" >
 
-<h2>Things to try in your REPL:</h2>
+<h2>Exercise</h2>
 <ul class="org-ul">
-<li>Starting a thread (future) to do a long calculation
+<li>Start a thread (future) to sum all the numbers to one hundred million
 </li>
-<li>Creating/Reading/Updating atoms
+
+<li>Create a function which appends the numbers 1-10 to a vector in an atom (hint: dotimes)
 </li>
-<li>Simulating multiple threads
+
+<li>Run the function across 10 threads simultaneously and observe the output
+</li>
+
+<li>Extra credit: write a function that confirms you have ten of each number
 </li>
 </ul>
 </section>
 </section>
 <section>
-<section id="sec-23" >
+<section id="sec-25" >
 
 <h2>Clojure's other concurrency primitives:</h2>
 <table>
@@ -434,7 +476,7 @@ We have ways around this (to be covered later)
 </section>
 </section>
 <section>
-<section id="sec-24" >
+<section id="sec-26" >
 
 <h2>Clojure's other concurrency primitives:</h2>
 <table>
@@ -445,7 +487,7 @@ We have ways around this (to be covered later)
 </section>
 </section>
 <section>
-<section id="sec-25" >
+<section id="sec-27" >
 
 <h2>Refs - co-ordinated updates</h2>
 <p>
@@ -456,6 +498,10 @@ Refs are also pointers to values, but updates to multiple refs are co-ordinated.
 Transactions must be explictly demarcated with a (dosync &#x2026;) block:
 </p>
 <pre><code data-trim class="clojure">
+(def account-a (ref 2341))
+(def account-b (ref 4123))
+(def transaction-log (ref []))
+
 (dosync
   (alter account-a + 100)
   (alter account-b - 100)
@@ -464,7 +510,7 @@ Transactions must be explictly demarcated with a (dosync &#x2026;) block:
 </section>
 </section>
 <section>
-<section id="sec-26" >
+<section id="sec-28" >
 
 <h2>Agents - asynchronous updates</h2>
 <p>
@@ -490,7 +536,7 @@ See also: send
 </section>
 </section>
 <section>
-<section id="sec-27" >
+<section id="sec-29" >
 
 <h2>I/O in transactions - revisited:</h2>
 <pre><code data-trim class="clojure">
@@ -512,9 +558,149 @@ See also: send
 </section>
 </section>
 <section>
-<section id="sec-28" >
+<section id="sec-30" >
 
-<h2>Making a counter</h2>
+<h2>Exercise</h2>
+<p>
+Add a visitor counter to the bottom of your web page that increments for each visit.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-31" >
+
+<h2>Middleware</h2>
+<p>
+Middleware are functions which are chained together and  adapt requests and/or responses
+</p>
+
+<pre><code data-trim class="clojure">
+(defn wrap-log-request [handler]
+  (fn [req]
+    (println req)
+    (handler req))
+
+(def app
+  (handler/site (wrap-log-request app-routes)))
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-32" >
+
+<h2>Middleware can be chained</h2>
+<pre><code data-trim class="clojure">
+(defn wrap-log-request [handler]
+  (fn [request]
+    (println request)
+    (handler request))
+
+(defn wrap-log-response [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (println response)
+      response)))
+
+(def app
+  (handler/site (wrap-log-response (wrap-log-request app-routes))))
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-33" >
+
+<h2>Threading macros</h2>
+<pre><code data-trim class="clojure">
+(def app
+  (-> app-routes
+      wrap-request-log
+      wrap-response-log
+      handler/site))
+</code></pre>
+<p>
+Compare with:
+</p>
+<pre><code data-trim class="clojure">
+(def app
+  (handler/site (wrap-response-log (wrap-request-log app-routes))))
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-34" >
+
+<h2>Useful Middleware</h2>
+<p>
+e.g for JSON response
+</p>
+<pre><code data-trim class="clojure">
+:dependencies [[ring-middleware-format "0.3.1"] ...]
+</code></pre>
+<pre><code data-trim class="clojure">
+(ns clojureschool.handler
+  (:require [ring.middleware.format :refer [wrap-restful-format]]))
+</code></pre>
+<pre><code data-trim class="clojure">
+(wrap-restful-format :formats [:json-kw :edn])
+</code></pre>
+<p>
+This instructs ring to convert Clojure data structures to their JSON equivalent, or as edn format if the Accept header requests it.
+</p>
+
+<p>
+Also middleware for cookies, authentication, rate limiting, compression etc&#x2026;
+</p>
+</section>
+</section>
+<section>
+<section id="sec-35" >
+
+<h2>That's it!</h2>
+<p>
+What we've covered:
+</p>
+
+<ul class="org-ul">
+<li>Ring, Compojure, Hiccup
+</li>
+<li>Handlers, Routes, Requests, Responses, Middleware
+</li>
+<li>Managing state with Atoms, Refs, Agents
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-36" >
+
+<h2>Further exercises</h2>
+<p>
+Write some middleware that returns a 401 status code unless ?token=123 is supplied in the url (
+</p>
+
+<p>
+Add a watcher to the counter atom that prints a message to the console every 10th visitor
+</p>
+
+<pre><code data-trim class="clojure">
+;; Re-write the below using -> threading macro
+(/ (* (+ 10 2) 5) (* 2 5))
+</code></pre>
+
+<pre><code data-trim class="clojure">
+;; Re-write the below using ->> threading macro
+(* 10 (apply + (map inc (range 10))))
+</code></pre>
+
+<p>
+Add a CSS stylesheet to your hiccup template and change the font color (hint: include-css)
+</p>
+</section>
+</section>
+<section>
+<section id="sec-37" >
+
+<h2>Appendix - concurrency</h2>
 <p>
 Version 1: getting and setting
 </p>
@@ -538,104 +724,6 @@ ab -n 1000 -c 5
 
 947
 
-</code></pre>
-</section>
-</section>
-<section>
-<section id="sec-29" >
-
-<h2>Middleware</h2>
-<p>
-Middleware are functions which are chained together and  adapt requests and/or responses
-</p>
-
-<pre><code data-trim class="clojure">
-(defn wrap-log-request [handler]
-  (fn [req]
-    (println req)
-    (handler req))
-
-(def app
-  (handler/site (wrap-log-request app-routes)))
-</code></pre>
-</section>
-</section>
-<section>
-<section id="sec-30" >
-
-<h2>Middleware can be chained</h2>
-<pre><code data-trim class="clojure">
-(defn wrap-log-request [handler]
-  (fn [request]
-    (println request)
-    (handler request))
-
-(defn wrap-log-response [handler]
-  (fn [request]
-    (let [response (handler request)]
-      (println response)
-      response)))
-
-(def app
-  (handler/site (wrap-log-response (wrap-log-request app-routes))))
-</code></pre>
-</section>
-</section>
-<section>
-<section id="sec-31" >
-
-<h2>Threading macros</h2>
-<pre><code data-trim class="clojure">
-(def app
-  (-> app-routes
-      wrap-request-log
-      wrap-response-log
-      handler/site))
-</code></pre>
-<p>
-Compare with:
-</p>
-<pre><code data-trim class="clojure">
-(def app
-  (handler/site (wrap-response-log (wrap-request-log app-routes))))
-</code></pre>
-</section>
-</section>
-<section>
-<section id="sec-32" >
-
-<h2>Middleware libraries</h2>
-<p>
-e.g for JSON response
-</p>
-<pre><code data-trim class="clojure">
-:dependencies [[ring-middleware-format "0.3.1"] ...]
-</code></pre>
-<pre><code data-trim class="clojure">
-(ns clojureschool.handler
-  (:require [ring.middleware.format :refer [wrap-restful-format]]))
-</code></pre>
-<pre><code data-trim class="clojure">
-(wrap-restful-format :formats [:json-kw :edn])
-</code></pre>
-<p>
-This instructs ring to convert Clojure data structures to their JSON equivalent, or as edn format if the Accept header requests it.
-</p>
-</section>
-
-</section>
-<section>
-<section id="sec-33" >
-
-<h2>Exercises</h2>
-<pre><code data-trim class="clojure">
-;; Re-write the below using -> threading macro
-(/ (* (+ 10 2) 5) (* 2 5))
-</code></pre>
-
-<pre><code data-trim class="clojure">
-;; Re-write the below using ->> threading macro
-(* 10 (apply + (map inc (range 10))))
 </code></pre>
 </section>
 </section>
