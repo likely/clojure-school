@@ -1,0 +1,140 @@
+* Thinking Functionally - Mutable State
+
+A Clojure *atom* is a *mutable* pointer to an *immutable* data structure.
+
+user=> (def counter (atom 0))
+#'user/counter
+
+We read the current value of the atom by dereferencing it:
+
+user=> (deref counter)
+0
+
+user=> @counter
+0
+
+* Updating an atom
+
+We update the value of an atom by passing it a *pure* function, which takes the previous value of the atom and returns the next value:
+
+user=> (swap! counter inc)
+1
+
+user=> @counter
+1
+
+* Modelling Time in Clojure
+
+* Kicking off another thread
+
+user=> (def a-future (future 
+                       (println "Starting massive calculation!"
+                       (Thread/sleep 10000)
+                       (println "Finished massive calculation!")
+                       42))
+#'user/a-future
+Starting massive calculation!
+
+user=> a-future
+#<core$future_call$reify__6267@e33cb8b: :pending>
+
+user=> @a-future
+Finished massive calculation!
+42
+
+See also: realized?, future-cancel, future-cancelled?, deref (multiple arities)
+
+* Why bother with atoms?
+
+Atoms support sharing state between multiple threads, without many of the common concurrency pitfalls:
+
+- No (user) locking
+- No deadlocks
+- 'ACI' (no durability - it's in memory!)
+
+But how?!
+
+* Software Transactional Memory
+
+The function you pass to 'swap!' is run inside a transaction.
+
+If multiple updates are made simultaneously to the same atom, the
+Clojure STM system (transparently) aborts and retries the updates so
+that anyone reading the atoms sees consistent values.
+
+* I/O in transactions
+
+No!
+
+The transaction might be aborted and retried - it's very difficult to
+abort I/O and (most of the time) unwise to retry it!
+
+(let [counter (atom 0)]
+  (dotimes [_ 10]
+    (future
+      (swap! counter
+             (fn [old-counter]
+               (print old-counter)
+               (inc old-counter))))))
+    
+We have ways around this (to be covered later)
+
+* Things to try in your REPL:
+
+- Starting a thread (future) to do a long calculation
+- Creating/Reading/Updating atoms
+- Simulating multiple threads
+
+* Clojure's other concurrency primitives:
+
+Slide with table (only atoms)
+
+* Clojure's other concurrency primitives:
+
+Slide with table (others)
+
+* Refs - co-ordinated updates
+
+Refs are also pointers to values, but updates to multiple refs are co-ordinated.
+
+Transactions must be explictly demarcated with a (dosync ...) block:
+
+(dosync
+  (alter account-a + 100)
+  (alter account-b - 100)
+  (alter transaction-log conj {:from :b, :to :a, :amount 100}))
+
+* Agents - asynchronous updates
+
+Agents are also pointers to values, but updates are asynchronous:
+
+(def log-messages (agent []))
+
+(send log-messages conj "Something happened!")
+(send-off log-messages conj "Something happened!")
+
+Actions sent to an individual agent are queued, not re-tried - only one action runs on any given agent at any time.
+
+So they're suitable for I/O!
+
+* I/O in transactions - revisited:
+
+(def log-agent (agent nil))
+(def my-counter (atom 0))
+
+(dotimes [_ 10]
+  (swap! my-counter
+         (fn [old-counter]
+           (let [new-counter (inc old-counter)
+           (send-off log-agent (fn [_] (println "Counter is now:" new-counter)))
+           (inc new-counter))))))
+
+- Sent/Sent-off actions are only queued *when the transaction is successful*
+
+* Clojure's concurrency primitives:
+
+Table
+
+See also: promise, delay
+
+Further reading: Stu Halloway's 'Concurrency in Clojure' talk - https://github.com/stuarthalloway/presentations/raw/master/DevNexus2013/Concurrency.pdf
