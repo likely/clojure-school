@@ -1,0 +1,684 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>(Clojure School)</title>
+<meta name="author" content="(Likely)"/>
+<link rel="stylesheet" href="./reveal.js/css/reveal.min.css"/>
+<link rel="stylesheet" href="./reveal.js/css/theme/solarized.css" id="theme"/>
+<link rel="stylesheet" href="css/zenburn.css"/>
+<link rel="stylesheet" href="./reveal.js/css/print/pdf.css" type="text/css" media="print"/>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<h1>Clojure School</h1>
+<h2>Likely</h2>
+<h2><a href="mailto:"></a></h2>
+<h2></h2></section>
+
+<section>
+<section id="sec-1" >
+
+<h2>One I prepared earlier</h2>
+<p>
+<a href="https://github.com/likely/weather">https://github.com/likely/weather</a>
+</p>
+</section>
+</section>
+<section>
+<section id="sec-2" >
+
+<h2>Clojure Style guide</h2>
+<p>
+<a href="https://github.com/bbatsov/clojure-style-guide">https://github.com/bbatsov/clojure-style-guide</a>
+</p>
+
+<p>
+Definitely bedtime reading
+</p>
+</section>
+</section>
+<section>
+<section id="sec-3" >
+
+<h2>Today's lesson</h2>
+<ul class="org-ul">
+<li>Clojure's Web Stack
+</li>
+<li>Managing State in Clojure
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-4" >
+
+<h2>Clojure's web stack</h2>
+<ul class="org-ul">
+<li>Ring: provides web server capability
+</li>
+<li>Compojure: provides a dsl for creating web handlers
+</li>
+<li>Hiccup: provides html templating
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-5" >
+
+<h2>A new Compojure application</h2>
+<pre><code data-trim class="bash">
+lein new compojure &lt;name&gt;
+</code></pre>
+
+<p>
+Look in your new project's ./project.clj to see the dependencies.
+</p>
+
+<p>
+Note the ring key in the project map:
+</p>
+
+<pre><code data-trim class="clojure">
+  :ring {:handler clojureschool.handler/app}
+</code></pre>
+</section>
+
+</section>
+<section>
+<section id="sec-6" >
+
+<h2>Boot up the web server</h2>
+<pre><code data-trim class="bash">
+lein ring server-headless
+</code></pre>
+
+<p>
+You will probably see a web server start on <a href="http://localhost:3000">http://localhost:3000</a>
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-7" >
+
+<h2>The template web application</h2>
+<p>
+Open ./src/&lt;name&gt;/handler.clj
+</p>
+
+<pre><code data-trim class="clojure">
+(ns clojureschool.handler
+  (:use compojure.core)
+  (:require [compojure.handler :as handler]
+            [compojure.route :as route]))
+
+(defroutes app-routes
+  (GET "/" [] "Hello World")
+  (route/resources "/")
+  (route/not-found "Not Found"))
+
+(def app
+  (handler/site app-routes))
+</code></pre>
+
+<p>
+Try changing "Hello World", code should be reloaded on browser refresh.
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-8" >
+
+<h2>A generic response - a plain old map</h2>
+<pre><code data-trim class="clojure">
+;; The routes are just a function that takes a request
+;; and returns a response
+
+(def app
+  (handler/site (fn [request]
+                  {:status 200
+                   :headers {"Content-Type" "text/plain"}
+                   :body "Hello World!"})))
+</code></pre>
+</section>
+
+
+</section>
+<section>
+<section id="sec-9" >
+
+<h2>What is a request?</h2>
+<pre><code data-trim class="clojure">
+(def app
+  (handler/site (fn [request]
+                  {:status 200
+                   :headers {"Content-Type" "text/plain"}
+                   :body (str request)})))
+</code></pre>
+
+<pre class="example">
+{:ssl-client-cert nil, :remote-addr "0:0:0:0:0:0:0:1%0", :scheme :http, :query-params {}, :session {}, :form-params {}, :multipart-params {}, :request-method :get, :query-string nil, :content-type nil, :cookies {}, :uri "/", :session/key nil, :server-name "localhost", :params {}, :headers {"accept-encoding" "gzip,deflate,sdch", "cache-control" "max-age=0", "connection" "keep-alive", "user-agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36", "accept-language" "en-US,en;q=0.8,fr-FR;q=0.6,fr;q=0.4", "accept" "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", "host" "localhost:3001"}, :content-length nil, :server-port 3001, :character-encoding nil, :body #&lt;HttpInput org.eclipse.jetty.server.HttpInput@13552393&gt;, :flash nil}
+</pre>
+</section>
+</section>
+<section>
+<section id="sec-10" >
+
+<h2>Requests and responses are just Clojure maps</h2>
+</section>
+
+
+</section>
+<section>
+<section id="sec-11" >
+
+<h2>Routes</h2>
+<p>
+Syntax familiar to anyone with a rails background
+</p>
+
+<pre><code data-trim class="clojure">
+  (GET "/:a/:b" [a b] ...) ;; Named params
+
+  (GET "/blah/*" [] ...) ;; Catch-all
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-12" >
+
+<h2>Web templating with Hiccup</h2>
+<pre><code data-trim class="clojure">
+:dependencies [[hiccup "1.0.4"] ...]
+</code></pre>
+
+<pre><code data-trim class="clojure">
+(ns webapp.core
+  (:require [hiccup.core :refer :all]
+            [hiccup.page :refer [html5]]))
+
+(def index-view
+  (html5
+   [:head [:title "Hiccup Website"]]
+   [:body [:h1 "Title goes here"]
+    [:ul (for [x (range 10)]
+           [:li (str "Item " x)])]]))
+
+(GET "/" [] index-view)
+
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-13" >
+
+<h2>Linking to static resources</h2>
+<pre><code data-trim class="clojure">
+(ns clojureschool.handler
+  (:require [hiccup.page :refer [html5 include-css]]))
+</code></pre>
+
+<pre><code data-trim class="clojure">
+(def index-view
+  (html5
+    [:head [:title "Hiccup Website"]
+           (include-css "site.css")]
+   [:body [:h1 "Title goes here"]
+    [:ul (for [x (range 10)]
+           [:li (str "Item " x)])]]))
+</code></pre>
+<pre><code data-trim class="clojure">
+(route/resources "/")
+</code></pre>
+<p>
+Put your static resources in &lt;project&gt;/resources/public/
+</p>
+</section>
+</section>
+<section>
+<section id="sec-14" >
+
+<h2>Insert into the view</h2>
+<pre><code data-trim class="clojure">
+(def counter 0)
+</code></pre>
+
+<pre><code data-trim class="clojure">
+(defn index-view [{:keys [counter]}]
+  (html5
+   [:head [:title "Web counter"]]
+   [:body [:h1 "Web counter"]
+    [:p (str "You're visitor #" (inc counter))]]))
+</code></pre>
+
+<p>
+How can we update the counter?
+</p>
+
+<p>
+Rich Hickey - Writing Datomic in Clojure - goto; conference 2013
+</p>
+</section>
+</section>
+<section>
+<section id="sec-15" >
+
+<h2>Thinking Functionally - Mutable State</h2>
+<p>
+A Clojure <b>atom</b> is a <b>mutable</b> pointer to an <b>immutable</b> data structure.
+</p>
+
+<pre><code data-trim class="clojure">
+user=> (def counter (atom 0))
+#'user/counter
+</code></pre>
+
+<p>
+We read the current value of the atom by dereferencing it:
+</p>
+<pre><code data-trim class="clojure">
+user=> (deref counter)
+0
+
+user=> @counter
+0
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-16" >
+
+<h2>Updating an atom</h2>
+<p>
+We update the value of an atom by passing it a <b>pure</b> function, which takes the previous value of the atom and returns the next value:
+</p>
+
+<pre><code data-trim class="clojure">
+user=> (swap! counter inc)
+1
+
+user=> @counter
+1
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-17" >
+
+<h2>Modelling Time in Clojure</h2>
+<img src="./images/clojure-time.png" alt="clojure-time.png" />
+</section>
+</section>
+<section>
+<section id="sec-18" >
+
+<h2>Kicking off another thread</h2>
+<pre><code data-trim class="clojure">
+user=> (def a-future (future 
+                       (println "Starting massive calculation!"
+                       (Thread/sleep 10000)
+                       (println "Finished massive calculation!")
+                       42))
+#'user/a-future
+Starting massive calculation!
+
+user=> a-future
+#<core$future_call$reify__6267@e33cb8b: :pending>
+
+user=> @a-future
+Finished massive calculation!
+42
+</code></pre>
+
+<p>
+See also: realized?, future-cancel, future-cancelled?, deref (multiple arities)
+</p>
+</section>
+</section>
+<section>
+<section id="sec-19" >
+
+<h2>Why bother with atoms?</h2>
+<p>
+Atoms support sharing state between multiple threads, without many of the common concurrency pitfalls:
+</p>
+
+<ul class="org-ul">
+<li>No (user) locking
+</li>
+<li>No deadlocks
+</li>
+<li>'ACI' (no durability - it's in memory!)
+</li>
+</ul>
+
+<p>
+But how?!
+</p>
+</section>
+</section>
+<section>
+<section id="sec-20" >
+
+<h2>Software Transactional Memory</h2>
+<p>
+The function you pass to 'swap!' is run inside a transaction.
+</p>
+
+<p>
+If multiple updates are made simultaneously to the same atom, the
+Clojure STM system (transparently) aborts and retries the updates so
+that anyone reading the atoms sees consistent values.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-21" >
+
+<h2>I/O in transactions</h2>
+<p>
+No!
+</p>
+
+<p>
+The transaction might be aborted and retried - it's very difficult to
+abort I/O and (most of the time) unwise to retry it!
+</p>
+<pre><code data-trim class="clojure">
+(let [counter (atom 0)]
+  (dotimes [_ 10]
+    (future
+      (swap! counter
+             (fn [old-counter]
+               (print old-counter)
+               (inc old-counter))))))
+
+=> 00000000001111111122222213334332554366576879
+</code></pre>
+
+<p>
+We have ways around this (to be covered later)
+</p>
+</section>
+</section>
+<section>
+<section id="sec-22" >
+
+<h2>Things to try in your REPL:</h2>
+<ul class="org-ul">
+<li>Starting a thread (future) to do a long calculation
+</li>
+<li>Creating/Reading/Updating atoms
+</li>
+<li>Simulating multiple threads
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-23" >
+
+<h2>Clojure's other concurrency primitives:</h2>
+<table>
+<tr><th></th><th text-align="center">Synchronous</th><th text-align="center">Asynchronous</th></tr>
+<tr><th text-align="right">Uncoordinated</th><td text-align="center">Atom</td><td text-align="center"></td></tr>
+<tr><th text-align="right">Coordinated</th><td text-align="center"></td><td></tr></tr>
+</table>
+</section>
+</section>
+<section>
+<section id="sec-24" >
+
+<h2>Clojure's other concurrency primitives:</h2>
+<table>
+<tr><th></th><th text-align="center">Synchronous</th><th text-align="center">Asynchronous</th></tr>
+<tr><th text-align="right">Uncoordinated</th><td text-align="center">Atom</td><td text-align="center">Agent</td></tr>
+<tr><th text-align="right">Coordinated</th><td text-align="center">Ref</td><td>n/a</tr></tr>
+</table>
+</section>
+</section>
+<section>
+<section id="sec-25" >
+
+<h2>Refs - co-ordinated updates</h2>
+<p>
+Refs are also pointers to values, but updates to multiple refs are co-ordinated.
+</p>
+
+<p>
+Transactions must be explictly demarcated with a (dosync &#x2026;) block:
+</p>
+<pre><code data-trim class="clojure">
+(dosync
+  (alter account-a + 100)
+  (alter account-b - 100)
+  (alter transaction-log conj {:from :b, :to :a, :amount 100}))
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-26" >
+
+<h2>Agents - asynchronous updates</h2>
+<p>
+Agents are also pointers to values, but updates are asynchronous:
+</p>
+<pre><code data-trim class="clojure">
+(def log-messages (agent []))
+
+(send-off log-messages conj "Something happened!")
+</code></pre>
+
+<p>
+Actions sent to an individual agent are queued, not re-tried - only one action runs on any given agent at any time.
+</p>
+
+<p>
+So they're suitable for I/O!
+</p>
+
+<p>
+See also: send
+</p>
+</section>
+</section>
+<section>
+<section id="sec-27" >
+
+<h2>I/O in transactions - revisited:</h2>
+<pre><code data-trim class="clojure">
+(def log-agent (agent nil))
+(def my-counter (atom 0))
+
+(dotimes [_ 10]
+  (swap! my-counter
+         (fn [old-counter]
+           (let [new-counter (inc old-counter)]
+             (send-off log-agent (fn [_] (println "Counter is now:" new-counter)))
+             new-counter))))
+</code></pre>
+
+<ul class="org-ul">
+<li>Sent/Sent-off actions are only queued <b>when the transaction is successful</b>
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-28" >
+
+<h2>Making a counter</h2>
+<p>
+Version 1: getting and setting
+</p>
+
+<pre><code data-trim class="clojure">
+
+(def counter (atom 0))
+
+(defn inc-counter! []
+  (let [n @counter]
+    (reset! counter (inc n))))
+
+</code></pre>
+
+<pre><code data-trim class="bash">
+;; using apache bench
+
+ab -n 1000 -c 5
+
+;; What does the counter say?
+
+947
+
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-29" >
+
+<h2>Middleware</h2>
+<p>
+Middleware are functions which are chained together and  adapt requests and/or responses
+</p>
+
+<pre><code data-trim class="clojure">
+(defn wrap-log-request [handler]
+  (fn [req]
+    (println req)
+    (handler req))
+
+(def app
+  (handler/site (wrap-log-request app-routes)))
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-30" >
+
+<h2>Middleware can be chained</h2>
+<pre><code data-trim class="clojure">
+(defn wrap-log-request [handler]
+  (fn [request]
+    (println request)
+    (handler request))
+
+(defn wrap-log-response [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (println response)
+      response)))
+
+(def app
+  (handler/site (wrap-log-response (wrap-log-request app-routes))))
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-31" >
+
+<h2>Threading macros</h2>
+<pre><code data-trim class="clojure">
+(def app
+  (-> app-routes
+      wrap-request-log
+      wrap-response-log
+      handler/site))
+</code></pre>
+<p>
+Compare with:
+</p>
+<pre><code data-trim class="clojure">
+(def app
+  (handler/site (wrap-response-log (wrap-request-log app-routes))))
+</code></pre>
+</section>
+</section>
+<section>
+<section id="sec-32" >
+
+<h2>Middleware libraries</h2>
+<p>
+e.g for JSON response
+</p>
+<pre><code data-trim class="clojure">
+:dependencies [[ring-middleware-format "0.3.1"] ...]
+</code></pre>
+<pre><code data-trim class="clojure">
+(ns clojureschool.handler
+  (:require [ring.middleware.format :refer [wrap-restful-format]]))
+</code></pre>
+<pre><code data-trim class="clojure">
+(wrap-restful-format :formats [:json-kw :edn])
+</code></pre>
+<p>
+This instructs ring to convert Clojure data structures to their JSON equivalent, or as edn format if the Accept header requests it.
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-33" >
+
+<h2>Exercises</h2>
+<pre><code data-trim class="clojure">
+;; Re-write the below using -> threading macro
+(/ (* (+ 10 2) 5) (* 2 5))
+</code></pre>
+
+<pre><code data-trim class="clojure">
+;; Re-write the below using ->> threading macro
+(* 10 (apply + (map inc (range 10))))
+</code></pre>
+</section>
+</section>
+</div>
+</div>
+<script src="./reveal.js/lib/js/head.min.js"></script>
+<script src="./reveal.js/js/reveal.min.js"></script>
+<script>
+
+        		// Full list of configuration options available here:
+        		// https://github.com/hakimel/reveal.js#configuration
+        		Reveal.initialize({
+        			controls: true,
+        			progress: true,
+        			history: false,
+        			center: true,
+        			rollingLinks: false,
+        			keyboard: true,
+        			overview: true,
+        			 // slide width
+        			 // slide height
+        			 // slide margin
+        			 // slide minimum scaling factor
+        			 // slide maximum scaling factor
+
+
+        			theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        			transition: Reveal.getQueryHash().transition || 'fade', // default/cube/page/concave/zoom/linear/fade/none
+        			transitionSpeed: 'default',
+
+        			// Optional libraries used to extend on reveal.js
+        			dependencies: [
+        				{ src: './reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } }
+        				,{ src: './reveal.js/plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } }
+        				,{ src: './reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } }
+        				,{ src: './reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        				,{ src: './reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } }
+        				,{ src: './reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: './reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: './reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+         				
+        			]
+        		});
+</script>
+</body>
+</html>

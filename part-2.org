@@ -1,102 +1,513 @@
+#+Title: Clojure School
+#+Author: Likely
+#+Email: 
+
+#+REVEAL_EXTRA_CSS: css/zenburn.css
+#+REVEAL_THEME: solarized
+#+OPTIONS: num:nil toc:nil reveal_mathjax:t
+#+REVEAL_TRANS: fade
+  
 * One I prepared earlier
 
   https://github.com/likely/weather
 
-* Clojure the Parasite
+* Clojure Style guide
 
-Clojure is, by its very nature, a hosted language. 
+  https://github.com/bbatsov/clojure-style-guide
 
-Stable:
+  Definitely bedtime reading
 
-- Clojure (obviously!) - targets the JVM
-- ClojureScript - compiles to JavaScript
+* Today's lesson
+  
+  - Clojure's Web Stack
+  - Managing State in Clojure
 
-On the way:
+* Clojure's web stack
 
-- Clojure.NET
-- clojurescript-lua
-- clojurec
-- clojure-py
-- clojure-scheme
+- Ring: provides web server capability
+- Compojure: provides a dsl for creating web handlers
+- Hiccup: provides html templating
 
-* Accessing the host environment - Clojure &rarr; Java
+Concepts: handlers, routes, requests, responses, middleware
 
-  #+BEGIN_HTML
-  <pre><code data-trim class="clojure">
-  (let [date (new org.joda.DateTime 2013 11 12)]
-    (.getDayOfWeek date))
+* A new Compojure application
 
-  ;; or
+#+BEGIN_HTML
+<pre><code data-trim class="bash">
+lein new compojure &lt;name&gt;
+</code></pre>
+#+END_HTML
 
-  (let [date (org.joda.DateTime. 2013 11 12)]
-    (. date (getDayOfWeek))
+Look in your new project's ./project.clj to see the dependencies.
 
-  (System/currentTimeMillis)
-  </code></pre>
-  #+END_HTML
-* With a spoonful of sugar
+Note the ring key in the project map:
 
-  #+BEGIN_HTML
-  <pre><code data-trim class="clojure">
-  ;; for date.withHourOfDay(12).withMinuteOfHour(53);
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+  :ring {:handler clojureschool.handler/app}
+</code></pre>
+#+END_HTML
 
-  ;; rather than
+* Boot up the web server
 
-  (.withMinuteOfHour (.withHourOfDay date 12) 53)
+#+BEGIN_HTML
+<pre><code data-trim class="bash">
+lein ring server-headless
+</code></pre>
+#+END_HTML
 
-  ;; we can write
-
-  (.. date (withHourOfDay 12) (withMinuteOfHour 53))
-  </code></pre>
-  #+END_HTML
-* Recycling with 'doto'
-  #+BEGIN_HTML
-  <pre><code data-trim class="clojure">
-  (let [my-obj (.. (doto (MyObjectBuilder.)  
-                     (.setValue 8) 
-                     (.setString "Hello!")
-                     (.setOtherThing (+ 145.2 13.25)))
-                   (build))]
-    my-obj)
-      </code></pre>
-  #+END_HTML
-
-    #+BEGIN_HTML
-    <pre><code data-trim class="java">
-     ;; equivalent to:
-  MyObjectBuilder builder = new MyObjectBuilder();
-  builder.setValue(8);
-  builder.setString("Hello!");
-  builder.setOtherThing(145.2 + 13.25);
-  MyObject myObj = builder.build();
-  </code></pre>
-  #+END_HTML
-* Importing the goods
-  #+BEGIN_HTML
-  <pre><code data-trim class="clojure">
-(ns your-ns
-  (:require [your-clj.namespace :refer [your-fn]])
-  (:import [java.util UUID Date Random Currency]
-           [org.joda.time DateTime Period Interval]))
-  </code></pre>
-  #+END_HTML
-* Implementing Java interfaces
-  #+BEGIN_HTML
-  <pre><code data-trim class="clojure">
-  (.addActionListener button
-                      (reify ActionListener
-                        (actionPerformed [this e]
-                          (prn "Got action:" e))))
-  </code></pre>
-  #+END_HTML
+You will probably see a web server start on http://localhost:3000
 
 
+* The template web application
 
-* Macros
-* Mutability
-* STM
-* Actors
-* Refs
-* Vars
-* Introducing snake
-* Websites with ring/compojure hiccup
+Open ./src/<name>/handler.clj
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(ns clojureschool.handler
+  (:use compojure.core)
+  (:require [compojure.handler :as handler]
+            [compojure.route :as route]))
+
+(defroutes app-routes
+  (GET "/" [] "Hello World")
+  (route/resources "/")
+  (route/not-found "Not Found"))
+
+(def app
+  (handler/site app-routes))
+</code></pre>
+#+END_HTML
+
+Try changing "Hello World", code should be reloaded on browser refresh.
+
+
+* A generic response - a plain old map
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+;; The routes are just a function that takes a request
+;; and returns a response
+
+(def app
+  (handler/site (fn [request]
+                  {:status 200
+                   :headers {"Content-Type" "text/plain"}
+                   :body "Hello World!"})))
+</code></pre>
+#+END_HTML
+
+* What is a request?
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(def app
+  (handler/site (fn [request]
+                  {:status 200
+                   :headers {"Content-Type" "text/plain"}
+                   :body (str request)})))
+</code></pre>
+#+END_HTML
+
+#+BEGIN_SRC
+{:ssl-client-cert nil, :remote-addr "0:0:0:0:0:0:0:1%0", :scheme :http, :query-params {}, :session {}, :form-params {}, :multipart-params {}, :request-method :get, :query-string nil, :content-type nil, :cookies {}, :uri "/", :session/key nil, :server-name "localhost", :params {}, :headers {"accept-encoding" "gzip,deflate,sdch", "cache-control" "max-age=0", "connection" "keep-alive", "user-agent" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36", "accept-language" "en-US,en;q=0.8,fr-FR;q=0.6,fr;q=0.4", "accept" "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8", "host" "localhost:3001"}, :content-length nil, :server-port 3001, :character-encoding nil, :body #<HttpInput org.eclipse.jetty.server.HttpInput@13552393>, :flash nil}
+#+END_SRC
+
+* Requests and responses are just Clojure maps
+
+* Exercise
+
+Update the handler to return a web page at:
+
+http://localhost:3000/ping
+
+That returns "pong".
+
+* Routes
+
+Syntax familiar to anyone with a rails background
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+;; Named params
+(GET "/:a/:b" [a b] ...)
+
+;; Query parameters
+;; e.g. /something?a=1&b=2
+(GET "/something" [a b] ...)
+
+;; Catch-all
+(GET "/blah/*" [] ...)
+</code></pre>
+#+END_HTML
+
+* Web templating with Hiccup
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+:dependencies [[hiccup "1.0.4"] ...]
+</code></pre>
+#+END_HTML
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(ns webapp.core
+  (:require [hiccup.core :refer :all]
+            [hiccup.page :refer [html5]]))
+
+(def index-view
+  (html5
+   [:head [:title "Hiccup Website"]]
+   [:body [:h1 "Title goes here"]
+    [:ul (for [x (range 10)]
+           [:li (str "Item " x)])]]))
+
+(GET "/" [] index-view)
+
+</code></pre>
+#+END_HTML
+
+
+* Exercise
+
+Update the handler to return a web page at:
+
+http://localhost:3000/list/[list_id]?n=21
+
+That returns a page with "List: [list id]" in the title and a list of integers from 1 to n.
+
+* Adding a visitor counter!
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(def counter 0)
+</code></pre>
+#+END_HTML
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(defn index-view [{:keys [counter]}]
+  (html5
+   [:head [:title "Web counter"]]
+   [:body [:h1 "Web counter"]
+    [:p (str "You're visitor number " (inc counter))]]))
+</code></pre>
+#+END_HTML
+
+How can we update the counter?
+
+* Thinking Functionally - Mutable State
+
+A Clojure *atom* is a *mutable* pointer to an *immutable* data structure.
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+user=> (def counter (atom 0))
+#'user/counter
+</code></pre>
+#+END_HTML
+
+We read the current value of the atom by dereferencing it:
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+user=> (deref counter)
+0
+
+user=> @counter
+0
+</code></pre>
+#+END_HTML
+
+* Updating an atom
+
+We update the value of an atom by passing it a *pure* function, which takes the previous value of the atom and returns the next value:
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+user=> (swap! counter inc)
+1
+
+user=> @counter
+1
+</code></pre>
+#+END_HTML
+
+* Modelling Time in Clojure
+  [[./images/clojure-time.png]]
+
+* Kicking off another thread
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+user=> (def a-future (future 
+                       (println "Starting massive calculation!"
+                       (Thread/sleep 10000)
+                       (println "Finished massive calculation!")
+                       42))
+#'user/a-future
+Starting massive calculation!
+
+user=> a-future
+#<core$future_call$reify__6267@e33cb8b: :pending>
+
+user=> @a-future
+Finished massive calculation!
+42
+</code></pre>
+#+END_HTML
+
+See also: realized?, future-cancel, future-cancelled?, deref (multiple arities)
+
+* Why bother with atoms?
+
+Atoms support sharing state between multiple threads, without many of the common concurrency pitfalls:
+
+- No (user) locking
+- No deadlocks
+- 'ACI' (no durability - it's in memory!)
+
+But how?!
+
+* Software Transactional Memory
+
+The function you pass to 'swap!' is run inside a transaction.
+
+If multiple updates are made simultaneously to the same atom, the
+Clojure STM system (transparently) aborts and retries the updates so
+that anyone reading the atoms sees consistent values.
+
+* I/O in transactions
+
+No!
+
+The transaction might be aborted and retried - it's very difficult to
+abort I/O and (most of the time) unwise to retry it!
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(let [counter (atom 0)]
+  (dotimes [_ 10]
+    (future
+      (swap! counter
+             (fn [old-counter]
+               (print old-counter)
+               (inc old-counter))))))
+
+=> 00000000001111111122222213334332554366576879
+</code></pre>
+#+END_HTML
+    
+We have ways around this (to be covered later)
+
+* Things to try in your REPL:
+
+- Starting a thread (future) to do a long calculation
+- Creating/Reading/Updating atoms
+- Simulating multiple threads
+
+* Clojure's other concurrency primitives:
+
+#+BEGIN_HTML
+<table>
+<tr><th></th><th text-align="center">Synchronous</th><th text-align="center">Asynchronous</th></tr>
+<tr><th text-align="right">Uncoordinated</th><td text-align="center">Atom</td><td text-align="center"></td></tr>
+<tr><th text-align="right">Coordinated</th><td text-align="center"></td><td></tr></tr>
+</table>
+#+END_HTML
+
+* Clojure's other concurrency primitives:
+
+#+BEGIN_HTML
+<table>
+<tr><th></th><th text-align="center">Synchronous</th><th text-align="center">Asynchronous</th></tr>
+<tr><th text-align="right">Uncoordinated</th><td text-align="center">Atom</td><td text-align="center">Agent</td></tr>
+<tr><th text-align="right">Coordinated</th><td text-align="center">Ref</td><td>n/a</tr></tr>
+</table>
+#+END_HTML
+
+* Refs - co-ordinated updates
+
+Refs are also pointers to values, but updates to multiple refs are co-ordinated.
+
+Transactions must be explictly demarcated with a (dosync ...) block:
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(def account-a (ref 2341))
+(def account-b (ref 4123))
+(def transaction-log (ref []))
+
+(dosync
+  (alter account-a + 100)
+  (alter account-b - 100)
+  (alter transaction-log conj {:from :b, :to :a, :amount 100}))
+</code></pre>
+#+END_HTML
+
+* Agents - asynchronous updates
+
+Agents are also pointers to values, but updates are asynchronous:
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(def log-messages (agent []))
+
+(send-off log-messages conj "Something happened!")
+</code></pre>
+#+END_HTML
+
+Actions sent to an individual agent are queued, not re-tried - only one action runs on any given agent at any time.
+
+So they're suitable for I/O!
+
+See also: send
+
+* I/O in transactions - revisited:
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(def log-agent (agent nil))
+(def my-counter (atom 0))
+
+(dotimes [_ 10]
+  (swap! my-counter
+         (fn [old-counter]
+           (let [new-counter (inc old-counter)]
+             (send-off log-agent (fn [_] (println "Counter is now:" new-counter)))
+             new-counter))))
+</code></pre>
+#+END_HTML
+
+- Sent/Sent-off actions are only queued *when the transaction is successful*
+
+* Exercise
+
+Add a visitor counter to the bottom of your web page that increments for each visit.
+
+* Middleware
+
+Middleware are functions which are chained together and  adapt requests and/or responses
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(defn wrap-log-request [handler]
+  (fn [req]
+    (println req)
+    (handler req))
+
+(def app
+  (handler/site (wrap-log-request app-routes)))
+</code></pre>
+#+END_HTML
+
+* Middleware can be chained
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(defn wrap-log-request [handler]
+  (fn [request]
+    (println request)
+    (handler request))
+
+(defn wrap-log-response [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (println response)
+      response)))
+
+(def app
+  (handler/site (wrap-log-response (wrap-log-request app-routes))))
+</code></pre>
+#+END_HTML
+
+* Threading macros
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(def app
+  (-> app-routes
+      wrap-request-log
+      wrap-response-log
+      handler/site))
+</code></pre>
+#+END_HTML
+Compare with:
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(def app
+  (handler/site (wrap-response-log (wrap-request-log app-routes))))
+</code></pre>
+#+END_HTML
+
+
+* Exercise 
+
+  Write some middleware that returns a 401 status code unless ?token=123 is supplied in the url (
+
+* Useful Middleware
+  e.g for JSON response
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+:dependencies [[ring-middleware-format "0.3.1"] ...]
+</code></pre>
+#+END_HTML
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(ns clojureschool.handler
+  (:require [ring.middleware.format :refer [wrap-restful-format]]))
+</code></pre>
+#+END_HTML
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(wrap-restful-format :formats [:json-kw :edn])
+</code></pre>
+#+END_HTML
+This instructs ring to convert Clojure data structures to their JSON equivalent, or as edn format if the Accept header requests it.
+
+Also middleware for cookies, authentication, rate limiting, compression etc...
+
+* Further exercises
+
+Add a watcher to the counter atom that prints a message to the console every 10th visitor
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+;; Re-write the below using -> threading macro
+(/ (* (+ 10 2) 5) (* 2 5))
+</code></pre>
+#+END_HTML
+  
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+;; Re-write the below using ->> threading macro
+(* 10 (apply + (map inc (range 10))))
+</code></pre>
+#+END_HTML
+
+Add a CSS stylesheet to your hiccup template and change the font color (hint: include-css)
+
+* Appendix - concurrency
+
+Version 1: getting and setting
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+
+(def counter (atom 0))
+
+(defn inc-counter! []
+  (let [n @counter]
+    (reset! counter (inc n))))
+
+</code></pre>
+#+END_HTML
+
+#+BEGIN_HTML
+<pre><code data-trim class="bash">
+;; using apache bench
+
+ab -n 1000 -c 5
+
+;; What does the counter say?
+
+947
+
+</code></pre>
+#+END_HTML
