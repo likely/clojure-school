@@ -105,7 +105,6 @@ lein ring server-headless
 You will probably see a web server start on <a href="http://localhost:3000">http://localhost:3000</a>
 </p>
 </section>
-
 </section>
 <section>
 <section id="sec-7" >
@@ -134,7 +133,6 @@ Open ./src/&lt;name&gt;/handler.clj
 Try changing "Hello World", code should be reloaded on browser refresh.
 </p>
 </section>
-
 </section>
 <section>
 <section id="sec-8" >
@@ -198,7 +196,7 @@ The string "Hello World" is converted into a response map automatically.
 </code></pre>
 
 <p>
-Compojure provides a nice DSL for mapping requests to responses.
+Compojure provides a nice DSL for mapping requests to responses. Don't worry about how it works yet!
 </p>
 </section>
 </section>
@@ -264,7 +262,6 @@ Syntax familiar to anyone with a rails background
 
 </code></pre>
 </section>
-
 </section>
 <section>
 <section id="sec-15" >
@@ -359,7 +356,7 @@ user=> @counter
 <h2>Kicking off another thread</h2>
 <pre><code data-trim class="clojure">
 user=> (def a-future (future 
-                       (println "Starting massive calculation!"
+                       (println "Starting massive calculation!")
                        (Thread/sleep 10000)
                        (println "Finished massive calculation!")
                        42))
@@ -675,7 +672,7 @@ What we've covered:
 
 <h2>Further exercises</h2>
 <p>
-Write some middleware that returns a 401 status code unless ?token=123 is supplied in the url (
+Write some middleware that returns a 401 status code unless ?token=123 is supplied in the url
 </p>
 
 <p>
@@ -695,36 +692,6 @@ Add a watcher to the counter atom that prints a message to the console every 10t
 <p>
 Add a CSS stylesheet to your hiccup template and change the font color (hint: include-css)
 </p>
-</section>
-</section>
-<section>
-<section id="sec-37" >
-
-<h2>Appendix - concurrency</h2>
-<p>
-Version 1: getting and setting
-</p>
-
-<pre><code data-trim class="clojure">
-
-(def counter (atom 0))
-
-(defn inc-counter! []
-  (let [n @counter]
-    (reset! counter (inc n))))
-
-</code></pre>
-
-<pre><code data-trim class="bash">
-;; using apache bench
-
-ab -n 1000 -c 5
-
-;; What does the counter say?
-
-947
-
-</code></pre>
 </section>
 </section>
 </div>
