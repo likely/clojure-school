@@ -475,7 +475,11 @@ Compare with:
 #+END_HTML
 #+BEGIN_HTML
 <pre><code data-trim class="clojure">
-(wrap-restful-format :formats [:json-kw :edn])
+
+(def app
+  (-> app-routes
+      (wrap-restful-format :formats [:json-kw :edn])
+      handler/site))
 </code></pre>
 #+END_HTML
 This instructs ring to convert Clojure data structures to their JSON equivalent, or as edn format if the Accept header requests it.
@@ -492,9 +496,11 @@ What we've covered:
   
 * Further exercises
 
-Write some middleware that returns a 401 status code unless ?token=123 is supplied in the url
+Add a CSS stylesheet to your hiccup template and change the font color (hint: include-css)
 
-Add a watcher to the counter atom that prints a message to the console every 10th visitor
+Write some middleware that returns a 401 status code unless ?token=123 is supplied in the URL
+
+Adapt your counter update to print a message to the console every 10th visitor (hint: I/O and agents)
 
 #+BEGIN_HTML
 <pre><code data-trim class="clojure">
@@ -509,7 +515,4 @@ Add a watcher to the counter atom that prints a message to the console every 10t
 (* 10 (apply + (map inc (range 10))))
 </code></pre>
 #+END_HTML
-
-Add a CSS stylesheet to your hiccup template and change the font color (hint: include-css)
-
 
