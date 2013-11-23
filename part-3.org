@@ -1,0 +1,144 @@
+#+Title: Clojure School
+#+Author: Likely
+#+Email: 
+
+#+REVEAL_EXTRA_CSS: css/zenburn.css
+#+REVEAL_THEME: solarized
+#+OPTIONS: num:nil toc:nil reveal_mathjax:t
+#+REVEAL_TRANS: fade
+
+* Today's lesson
+
+  - macros
+  - core.async
+  - clojurescript
+
+* These are big topics!
+
+We could easily spend a day on each one.
+
+We'll give you an understanding of the basics, and hopefully the hunger to find out more.
+
+
+* What are Macros?
+
+A macro is just a function that receives its arguments *unevaluated* at compile time.
+
+Because the unevaluated arguments are *code*, macros can operate on the code as if it was data*.
+
+(* code is data)
+
+* Why are Macros? 
+
+If *functions* receive data and return new data,
+
+Macros receive *code* and return *new code*.
+
+Because the macro receives its code unevaluated, the code doesn't have to be valid Clojure. This is how macros can extend the language in new ways.
+
+* Examples
+  
+(ns clojureschool.handler
+  (:require [clojure.walk :refer [macroexpand-all]]))
+
+(macroexpand-all '(defroutes app-routes
+  (GET "/" [] (counter-view (swap! counter inc)))
+  (route/resources "/")
+  (route/not-found "Not Found")))
+
+=> (def app-routes
+  (compojure.core/routes
+   (compojure.core/make-route
+    :get
+    (clout.core/route-compile "/")
+    (fn* ([request__1478__auto__]
+            (let* []
+                  (counter-view (swap! counter inc))))))
+   (route/resources "/")
+   (route/not-found "Not Found")))
+
+* Left-handed Clojure
+
+What if Clojure wanted functions to come *after* their arguments? No problem!
+
+(ns clojureschool.handler
+  (:require [clojure.walk :refer [macroexpand-all prewalk]]))
+
+(defn reverse-if-list [expr]
+  (if (list? expr)
+    (reverse expr)
+    expr))
+
+(defmacro left-handed [expr]
+  (prewalk reverse-if-list expr))
+
+Does it work?
+
+(macroexpand-all
+ '(left-handed
+   ("Hello Mirror World" println)))
+
+We can even nest expressions!
+
+(left-handed ((1 1 +) "One plus one is " str))
+
+* Why are macros useful?
+
+Many core library functions are expressed using macros:
+
+e.g. and, or, when, while, for, cond
+
+(macroexpand '(when true (println "It's true!")))
+
+* Why are macros useful?
+
+Also useful for replacing template code:
+
+with-open
+
+(use 'clojure.java.io)
+(with-open [rdr (reader "/tmp/test.txt")]
+  ;; Do something to file.
+  ;; File will be closed automatically
+  ;; at the end of the expression)
+
+* Why are macros useful?
+
+Or for reorganising code to make it more readable:
+
+e.g. -> ->>
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(def app
+  (-> app-routes
+      wrap-request-log
+      wrap-response-log
+      handler/site))
+</code></pre>
+#+END_HTML
+Compare with:
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+(def app
+  (handler/site (wrap-response-log (wrap-request-log app-routes))))
+</code></pre>
+#+END_HTML
+
+
+* Exercise
+
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+;; Re-write the below using -> threading macro
+(/ (* (+ 10 2) 5) (* 2 5))
+</code></pre>
+#+END_HTML
+  
+#+BEGIN_HTML
+<pre><code data-trim class="clojure">
+;; Re-write the below using ->> threading macro
+(* 10 (apply + (map inc (range 10))))
+</code></pre>
+#+END_HTML
+
