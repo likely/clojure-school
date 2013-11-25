@@ -1,0 +1,887 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>(Clojure School)</title>
+<meta name="author" content="(Likely)"/>
+<link rel="stylesheet" href="./reveal.js/css/reveal.min.css"/>
+<link rel="stylesheet" href="./reveal.js/css/theme/solarized.css" id="theme"/>
+<link rel="stylesheet" href="css/zenburn.css"/>
+<link rel="stylesheet" href="./reveal.js/css/print/pdf.css" type="text/css" media="print"/>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<h1>Clojure School</h1>
+<h2>Likely</h2>
+<h2><a href="mailto:"></a></h2>
+<h2></h2></section>
+
+<section>
+<section id="sec-1" >
+
+<h2>Today's lesson</h2>
+<ul class="org-ul">
+<li>macros
+</li>
+<li>core.async
+</li>
+<li>clojurescript
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-2" >
+
+<h2>These are big topics!</h2>
+<p>
+We could easily spend a day on each one.
+</p>
+
+<p>
+We'll give you an understanding of the basics, and hopefully the hunger to find out more.
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-3" >
+
+<h2>What are Macros?</h2>
+<p>
+A macro is just a function that receives its arguments <b>unevaluated</b> at compile time.
+</p>
+
+<p>
+Because the unevaluated arguments are <b>code</b>, macros can operate on the code as if it was data*.
+</p>
+
+<p>
+(* code is data)
+</p>
+</section>
+</section>
+<section>
+<section id="sec-4" >
+
+<h2>Why are Macros?</h2>
+<p>
+If <b>functions</b> receive data and return new data,
+</p>
+
+<p>
+Macros receive <b>code</b> and return <b>new code</b>.
+</p>
+
+<p>
+Because the macro receives its code unevaluated, the code doesn't have to be valid Clojure. This is how macros can extend the language in new ways.
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-5" >
+
+<h2>Examples</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">ns</span> clojureschool.handler
+  (<span style="color: #00ffff;">:require</span> [clojure.walk <span style="color: #00ffff;">:refer</span> [macroexpand-all]]))
+
+(<span style="color: #ffff00;">macroexpand-all</span> '(<span style="color: #00ff00;">defroutes</span> <span style="color: #0000ff;">app-routes</span>
+  (<span style="color: #ff0000;">GET</span> <span style="color: #00ffff;">"/"</span> [] (counter-view (<span style="color: #00ff00;">swap!</span> counter inc)))
+  (route/resources <span style="color: #00ffff;">"/"</span>)
+  (route/not-found <span style="color: #00ffff;">"Not Found"</span>)))
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">def</span> <span style="color: #0000ff;">app-routes</span>
+    (compojure.core/routes
+     (compojure.core/make-route
+      <span style="color: #00ffff;">:get</span>
+      (clout.core/route-compile <span style="color: #00ffff;">"/"</span>)
+      (fn* ([request__1478__auto__]
+              (let* []
+                    (counter-view (<span style="color: #00ff00;">swap!</span> counter inc))))))
+     (route/resources <span style="color: #00ffff;">"/"</span>)
+     (route/not-found <span style="color: #00ffff;">"Not Found"</span>)))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-6" >
+
+<h2>Left-handed Clojure</h2>
+<p>
+What if Clojure wanted functions to come <b>after</b> their arguments? No problem!
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">ns</span> clojureschool.handler
+  (<span style="color: #00ffff;">:require</span> [clojure.walk <span style="color: #00ffff;">:refer</span> [macroexpand-all prewalk]]))
+
+(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">reverse-if-list</span> [expr]
+  (<span style="color: #00ff00;">if</span> (<span style="color: #00ff00;">list?</span> expr)
+    (<span style="color: #00ff00;">reverse</span> expr)
+    expr))
+
+(<span style="color: #00ff00;">defmacro</span> <span style="color: #0000ff;">left-handed</span> [expr]
+  (<span style="color: #ffff00;">prewalk</span> reverse-if-list expr))
+</pre>
+</div>
+
+<p>
+Does it work?
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #ffff00;">macroexpand-all</span>
+ '(left-handed
+   (<span style="color: #00ffff;">"Hello Mirror World"</span> println)))
+</pre>
+</div>
+
+<p>
+We can even nest expressions!
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(left-handed ((1 1 +) <span style="color: #00ffff;">"One plus one is "</span> str))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-7" >
+
+<h2>Why are macros useful?</h2>
+<p>
+Many core library functions are expressed using macros:
+</p>
+
+<p>
+e.g. and, or, when, while, for, cond
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">macroexpand</span> '(<span style="color: #00ff00;">when</span> true (<span style="color: #00ff00;">println</span> <span style="color: #00ffff;">"It's true!"</span>)))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-8" >
+
+<h2>Why are macros useful?</h2>
+<p>
+Also useful for replacing template code:
+</p>
+
+<p>
+with-open
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">use</span> 'clojure.java.io)
+(<span style="color: #00ff00;">with-open</span> [rdr (reader <span style="color: #00ffff;">"/tmp/test.txt"</span>)]
+  <span style="color: #00ff00; font-style: italic;">;; </span><span style="color: #00ff00; font-style: italic;">Do something to file.</span>
+  <span style="color: #00ff00; font-style: italic;">;; </span><span style="color: #00ff00; font-style: italic;">File will be closed automatically</span>
+  <span style="color: #00ff00; font-style: italic;">;; </span><span style="color: #00ff00; font-style: italic;">at the end of the expression</span>
+)
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-9" >
+
+<h2>Exercise</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure"><span style="color: #00ff00; font-style: italic;">;; </span><span style="color: #00ff00; font-style: italic;">Re-write the below using -&gt; threading macro</span>
+(<span style="color: #00ff00;">/</span> (<span style="color: #00ff00;">*</span> (<span style="color: #00ff00;">+</span> 10 2) 5) (<span style="color: #00ff00;">*</span> 2 5))
+
+
+<span style="color: #00ff00; font-style: italic;">;; </span><span style="color: #00ff00; font-style: italic;">Re-write the below using -&gt;&gt; threading macro</span>
+(<span style="color: #00ff00;">*</span> 10 (<span style="color: #00ff00;">apply</span> + (<span style="color: #00ff00;">map</span> inc (<span style="color: #00ff00;">range</span> 10))))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-10" >
+
+<h2>This week's project</h2>
+<p>
+Last week we made a visitor counter, this week we'll make a chat application
+</p>
+</section>
+</section>
+<section>
+<section id="sec-11" >
+
+<h2>The chat application</h2>
+<div class="org-src-container">
+
+<pre class="src src-bash">lein new compojure chitter
+</pre>
+</div>
+
+
+<p>
+Add a vew with a simple form to add chat messages.
+</p>
+
+<p>
+Messages are stored in an atom
+</p>
+</section>
+</section>
+<section>
+<section id="sec-12" >
+
+<h2>The application so far&#x2026;</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">def</span> <span style="color: #0000ff;">messages</span> (<span style="color: #00ff00;">atom</span> []))
+
+(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">index-view</span> [messages]
+  (html5
+   [<span style="color: #00ffff;">:body</span>
+    [<span style="color: #00ffff;">:h1</span> <span style="color: #00ffff;">"Chitter Chat"</span>]
+    [<span style="color: #00ffff;">:form</span> {<span style="color: #00ffff;">:method</span> <span style="color: #00ffff;">"post"</span>}
+     [<span style="color: #00ffff;">:div</span> [<span style="color: #00ffff;">:textarea</span> {<span style="color: #00ffff;">:name</span> <span style="color: #00ffff;">"message"</span>}]]
+     [<span style="color: #00ffff;">:input</span> {<span style="color: #00ffff;">:type</span> <span style="color: #00ffff;">"submit"</span> <span style="color: #00ffff;">:value</span> <span style="color: #00ffff;">"Post Message"</span>}]]
+    [<span style="color: #00ffff;">:ul</span> (<span style="color: #00ff00;">for</span> [message messages]
+           [<span style="color: #00ffff;">:li</span> message])]]))
+
+(<span style="color: #ff0000;">GET</span> <span style="color: #00ffff;">"/"</span> [] (index-view @messages))
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-13" >
+
+<h2>This should be familiar from last week</h2>
+</section>
+
+</section>
+<section>
+<section id="sec-14" >
+
+<h2>User data</h2>
+<p>
+Add a POST route for dealing with user data
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #ff0000;">POST</span> <span style="color: #00ffff;">"/"</span> [message]
+        (<span style="color: #00ff00;">-&gt;</span> messages (<span style="color: #00ff00;">swap!</span> conj message) index-view))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-15" >
+
+<h2>This is synchronous</h2>
+<p>
+If we're going to make a game, how can we do this without reloading the page?
+</p>
+</section>
+</section>
+<section>
+<section id="sec-16" >
+
+<h2>We need to use a websocket-capable server</h2>
+<p>
+Add these to dependencies..
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">[http-kit <span style="color: #00ffff;">"2.0.0-SNAPSHOT"</span>]
+[ring/ring-devel <span style="color: #00ffff;">"1.1.8"</span>]
+</pre>
+</div>
+
+<p>
+&#x2026; and a 'main' handler
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure"><span style="color: #00ffff;">:main</span> chitter.handler
+</pre>
+</div>
+
+<p>
+&#x2026; include the new server
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">[org.httpkit.server <span style="color: #00ffff;">:refer</span> [run-server]]
+</pre>
+</div>
+
+<p>
+&#x2026; and a main function to be called
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">-main</span> [&amp; args]
+  (run-server app {<span style="color: #00ffff;">:port</span> 3000}))
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-17" >
+
+<h2>What have we done?</h2>
+<p>
+We've completely replaced the server that our application runs within.
+</p>
+
+<p>
+Because our new server works with ring request/response maps, we don't have to do anything more.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-18" >
+
+<h2>Start up again</h2>
+<p>
+This time execute `lein run`:
+</p>
+
+<p>
+lein run
+</p>
+
+<p>
+This will always execute the -main function in your handler. We have made this start the server.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-19" >
+
+<h2>Hot reloading</h2>
+<p>
+We included ring-devel earlier, this was so we could enable code reloading.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">[ring.middleware.reload <span style="color: #00ffff;">:refer</span> [wrap-reload]]
+</pre>
+</div>
+
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">def</span> <span style="color: #0000ff;">app</span>
+  (<span style="color: #00ff00;">-&gt;</span> app-routes wrap-reload handler/site))
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-20" >
+
+<h2>Middleware</h2>
+<p>
+Middleware are functions which are chained together and  adapt requests and/or responses
+</p>
+
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">wrap-log-request</span> [handler]
+  (<span style="color: #00ff00;">fn</span> [req]
+    (<span style="color: #00ff00;">println</span> req)
+    (handler req)))
+
+(<span style="color: #00ff00;">def</span> <span style="color: #0000ff;">app</span>
+  (handler/site (wrap-log-request app-routes)))
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-21" >
+
+<h2>Middleware can be chained</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">wrap-log-request</span> [handler]
+  (<span style="color: #00ff00;">fn</span> [request]
+    (<span style="color: #00ff00;">println</span> request)
+    (handler request)))
+
+(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">wrap-log-response</span> [handler]
+  (<span style="color: #00ff00;">fn</span> [request]
+    (<span style="color: #00ff00;">let</span> [response (handler request)]
+      (<span style="color: #00ff00;">println</span> response)
+      response)))
+
+(<span style="color: #00ff00;">def</span> <span style="color: #0000ff;">app</span>
+  (handler/site (wrap-log-response (wrap-log-request app-routes))))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-22" >
+
+<h2>Threading macros</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">def</span> <span style="color: #0000ff;">app</span>
+  (<span style="color: #00ff00;">-&gt;</span> app-routes
+      wrap-request-log
+      wrap-response-log
+      handler/site))
+
+<span style="color: #00ff00; font-style: italic;">;; </span><span style="color: #00ff00; font-style: italic;">Compared with...</span>
+
+(<span style="color: #00ff00;">def</span> <span style="color: #0000ff;">app</span>
+  (handler/site (wrap-response-log (wrap-request-log app-routes))))
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-23" >
+
+<h2>Useful Middleware</h2>
+<p>
+e.g for JSON response
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure"><span style="color: #00ff00; font-style: italic;">;; </span><span style="color: #00ff00; font-style: italic;">In project.clj</span>
+<span style="color: #00ffff;">:dependencies</span> [[ring-middleware-format <span style="color: #00ffff;">"0.3.1"</span>] ...]
+</pre>
+</div>
+
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">ns</span> clojureschool.handler
+  (<span style="color: #00ffff;">:require</span> [ring.middleware.format <span style="color: #00ffff;">:refer</span> [wrap-restful-format]]))
+
+(<span style="color: #00ff00;">def</span> <span style="color: #0000ff;">app</span>
+  (<span style="color: #00ff00;">-&gt;</span> app-routes
+      (wrap-restful-format <span style="color: #00ffff;">:formats</span> [<span style="color: #00ffff;">:json-kw</span> <span style="color: #00ffff;">:edn</span>])
+      handler/site))
+</pre>
+</div>
+
+<p>
+This instructs ring to convert Clojure data structures to their JSON equivalent, or as edn format if the Accept header requests it.
+</p>
+
+<p>
+Also middleware for cookies, authentication, rate limiting, compression etc&#x2026;
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-24" >
+
+<h2>Async code</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #ffff00;">macroexpand-all</span>
+ '(with-channel request channel
+    (on-receive channel
+                (<span style="color: #00ff00;">fn</span> [data]
+                  (send! channel data)))))
+</pre>
+</div>
+
+<p>
+Macro expands to&#x2026;
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(let* [channel (<span style="color: #00ffff;">:async-channel</span> request)]
+      (<span style="color: #00ff00;">if</span> (<span style="color: #00ffff;">:websocket?</span> request)
+        (let* [temp__4090__auto__ (clojure.core/<span style="color: #00ff00;">get-in</span> request [<span style="color: #00ffff;">:headers</span> <span style="color: #00ffff;">"sec-websocket-key"</span>])]
+              (<span style="color: #00ff00;">if</span> temp__4090__auto__
+                (let* [key__2755__auto__ temp__4090__auto__]
+                      (<span style="color: #00ff00;">do</span> (<span style="color: #00ff00;">.</span> channel <span style="color: #ff0000;">sendHandshake</span> {<span style="color: #00ffff;">"Sec-WebSocket-Accept"</span> (org.httpkit.server/accept key__2755__auto__)
+                                                    <span style="color: #00ffff;">"Upgrade"</span> <span style="color: #00ffff;">"websocket"</span>
+                                                    <span style="color: #00ffff;">"Connection"</span> <span style="color: #00ffff;">"Upgrade"</span>})
+                          (on-receive channel
+                                      (fn* ([data] (send! channel data))))
+                          {<span style="color: #00ffff;">:body</span> channel})) {<span style="color: #00ffff;">:status</span> 400
+                                             <span style="color: #00ffff;">:body</span> <span style="color: #00ffff;">"Bad Sec-WebSocket-Key header"</span>}))
+        (<span style="color: #00ff00;">do</span> (on-receive channel
+                        (fn* ([data] (send! channel data))))
+            {<span style="color: #00ffff;">:body</span> channel})))
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-25" >
+
+<h2>Websockets</h2>
+<p>
+Websockets are long-lived connections between the client and the server through which messages can be sent in both directions.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-26" >
+
+<h2>In your browser's js console&#x2026;</h2>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00ff00;">var</span> <span style="color: #0000ff;">socket</span> = <span style="color: #00ff00;">new</span> <span style="color: #ffff00;">WebSocket</span>(<span style="color: #00ffff;">"ws://localhost:3000/echo"</span>);
+
+socket.onmessage = <span style="color: #00ff00;">function</span>(<span style="color: #0000ff;">event</span>) { console.log(event.data); }
+
+socket.send(<span style="color: #00ffff;">"Data to be sent"</span>);
+</pre>
+</div>
+
+<p>
+You should see the data you sent echoed back.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-27" >
+
+<h2>Exercise</h2>
+<p>
+Make the server multi-client.
+</p>
+
+<p>
+Keep a list of connected clients and send each message to all clients.
+</p>
+
+<p>
+Test it out with two browser windows.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-28" >
+
+<h2>One I prepared earlier</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">def</span> <span style="color: #0000ff;">clients</span> (<span style="color: #00ff00;">atom</span> []))
+
+(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">make-socket!</span> [request]
+  (with-channel request client
+    (<span style="color: #00ff00;">swap!</span> clients conj client)
+    (on-receive client
+                (<span style="color: #00ff00;">fn</span> [data]
+                  (<span style="color: #00ff00;">doseq</span> [a-client @clients]
+                    (send! a-client data))))))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-29" >
+
+<h2>ClojureScript</h2>
+<p>
+You can write client-side javascript in Clojure too!
+</p>
+</section>
+
+</section>
+<section>
+<section id="sec-30" >
+
+<h2>Include Clojurescript in your project</h2>
+<p>
+In dependencies&#x2026; 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure"><span style="color: #00ffff;">:dependencies</span> [[org.clojure/clojurescript <span style="color: #00ffff;">"0.0-XXXX"</span>] ...]
+</pre>
+</div>
+
+<p>
+Clojurescript is compiled, so add the compiler to your plugins&#x2026;
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure"><span style="color: #00ffff;">:plugins</span> [[lein-cljsbuild <span style="color: #00ffff;">"1.0.1-SNAPSHOT"</span>] ...]
+</pre>
+</div>
+
+<p>
+&#x2026; And tell cljsbuild where to put your compiled javascript:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure"><span style="color: #00ffff;">:cljsbuild</span> {<span style="color: #00ffff;">:builds</span> {<span style="color: #00ffff;">:main</span> {<span style="color: #00ffff;">:compiler</span> {<span style="color: #00ffff;">:output-to</span> <span style="color: #00ffff;">"resources/public/js/main.js"</span>}}}}
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-31" >
+
+<h2>Keeping the Clojure(Script) separate</h2>
+<p>
+Next to your /src directory, create a /src-cljs/chitter directory
+</p>
+
+<p>
+This is where cljsbuild will look for clojurescript files by default
+</p>
+</section>
+</section>
+<section>
+<section id="sec-32" >
+
+<h2>Writing your first ClojureScript</h2>
+<p>
+Create the file
+</p>
+
+<p>
+/src-cljs/chitter/client.cljs
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">ns</span> chitter.client)
+
+(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">greet</span> [name]
+  (<span style="color: #00ff00;">str</span> <span style="color: #00ffff;">"Hello "</span> name))
+</pre>
+</div>
+
+<p>
+And visit&#x2026;
+</p>
+
+<p>
+<a href="http://localhost:3000/js/main.js">http://localhost:3000/js/main.js</a>
+</p>
+</section>
+</section>
+<section>
+<section id="sec-33" >
+
+<h2>Include this in our page</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">[hiccup.page <span style="color: #00ffff;">:refer</span> [html5 include-js]]
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(html5
+   [<span style="color: #00ffff;">:head</span>
+    (include-js <span style="color: #00ffff;">"js/main.js"</span>)]
+   [<span style="color: #00ffff;">:body</span> ....
+   ])
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-34" >
+
+<h2>Reload the page&#x2026;</h2>
+<p>
+And in your console, type
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-js">chitter.client.greet(<span style="color: #00ffff;">"World"</span>);
+
+=&gt; <span style="color: #00ffff;">"Hello World"</span>
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-35" >
+
+<h2>Adding messages manually</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">ns</span> chitter.client
+  (<span style="color: #00ffff;">:require</span> [dommy.core <span style="color: #00ffff;">:as</span> dommy])
+  (<span style="color: #00ffff;">:use-macros</span> [dommy.macros <span style="color: #00ffff;">:only</span> [node sel1]]))
+
+(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">main</span> []
+  (<span style="color: #00ff00;">let</span> [socket (js/WebSocket. <span style="color: #00ffff;">"ws://localhost:3000/echo"</span>)]
+    (set! (<span style="color: #ff0000;">.-onmessage</span> socket)
+          (<span style="color: #00ff00;">fn</span> [event]
+            (dommy/append! (sel1 <span style="color: #00ffff;">:#messages</span>)
+                           [<span style="color: #00ffff;">:li</span> (<span style="color: #ff0000;">.-data</span> event)])))
+    socket))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-36" >
+
+<h2>Javascript Interop</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">let</span> [socket (js/WebSocket. <span style="color: #00ffff;">"ws://localhost:3000/echo"</span>)] ...)
+</pre>
+</div>
+
+
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00ff00;">var</span> <span style="color: #0000ff;">socket</span> = <span style="color: #00ff00;">new</span> <span style="color: #ffff00;">WebSocket</span>(<span style="color: #00ffff;">"ws://localhost:3000/echo"</span>);
+</pre>
+</div>
+
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(set! (<span style="color: #ff0000;">.-onmessage</span> socket) (<span style="color: #00ff00;">fn</span> [event] ...))
+</pre>
+</div>
+
+
+<div class="org-src-container">
+
+<pre class="src src-js">socket.onmessage = <span style="color: #00ff00;">function</span>(<span style="color: #0000ff;">event</span>) { ... };
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-37" >
+
+<h2>Dealing with send and receive</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ff00;">ns</span> chitter.client
+  (<span style="color: #00ffff;">:require</span> [dommy.core <span style="color: #00ffff;">:as</span> dommy])
+  (<span style="color: #00ffff;">:use-macros</span> [dommy.macros <span style="color: #00ffff;">:only</span> [sel1]]))
+
+(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">bind-send-event!</span> [socket]
+  (<span style="color: #00ff00;">let</span> [button      (sel1 <span style="color: #00ffff;">:#post</span>)
+        message-box (sel1 <span style="color: #00ffff;">:#message</span>)]
+    (dommy/listen! button <span style="color: #00ffff;">:click</span>
+                   (<span style="color: #00ff00;">fn</span> [] (<span style="color: #ff0000;">.send</span> socket (<span style="color: #ff0000;">.-value</span> message-box))))))
+
+(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">bind-receive-event!</span> [socket]
+  (set! (<span style="color: #ff0000;">.-onmessage</span> socket)
+        (<span style="color: #00ff00;">fn</span> [event]
+          (dommy/append! (sel1 <span style="color: #00ffff;">:#messages</span>)
+                         [<span style="color: #00ffff;">:li</span> (<span style="color: #ff0000;">.-data</span> event)]))))
+
+(<span style="color: #00ff00;">defn</span> <span style="color: #0000ff;">main</span> []
+  (<span style="color: #00ff00;">let</span> [socket (js/WebSocket. <span style="color: #00ffff;">"ws://localhost:3000/echo"</span>)]
+    (bind-send-event! socket)
+    (bind-receive-event! socket)
+    socket))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-38" >
+
+<h2>Load javascript on page load</h2>
+<p>
+Add to bottom of page
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">[<span style="color: #00ffff;">:script</span> <span style="color: #00ffff;">"chitter.client.main()"</span>]
+</pre>
+</div>
+</section>
+</section>
+</div>
+</div>
+<script src="./reveal.js/lib/js/head.min.js"></script>
+<script src="./reveal.js/js/reveal.min.js"></script>
+<script>
+
+        		// Full list of configuration options available here:
+        		// https://github.com/hakimel/reveal.js#configuration
+        		Reveal.initialize({
+        			controls: true,
+        			progress: true,
+        			history: false,
+        			center: true,
+        			rollingLinks: false,
+        			keyboard: true,
+        			overview: true,
+        			 // slide width
+        			 // slide height
+        			 // slide margin
+        			 // slide minimum scaling factor
+        			 // slide maximum scaling factor
+
+
+        			theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        			transition: Reveal.getQueryHash().transition || 'fade', // default/cube/page/concave/zoom/linear/fade/none
+        			transitionSpeed: 'default',
+
+        			// Optional libraries used to extend on reveal.js
+        			dependencies: [
+        				{ src: './reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } }
+        				,{ src: './reveal.js/plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } }
+        				,{ src: './reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } }
+        				,{ src: './reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        				,{ src: './reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } }
+        				,{ src: './reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: './reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: './reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+         				
+        			]
+        		});
+</script>
+</body>
+</html>

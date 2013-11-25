@@ -4,7 +4,7 @@
 
 #+REVEAL_EXTRA_CSS: css/zenburn.css
 #+REVEAL_THEME: solarized
-#+OPTIONS: num:nil toc:nil reveal_mathjax:t
+#+OPTIONS: num:nil toc:nil reveal_mathjax:t history:t
 #+REVEAL_TRANS: fade
 
 * Today's lesson
@@ -36,51 +36,63 @@ Macros receive *code* and return *new code*.
 
 Because the macro receives its code unevaluated, the code doesn't have to be valid Clojure. This is how macros can extend the language in new ways.
 
+
 * Examples
   
-(ns clojureschool.handler
-  (:require [clojure.walk :refer [macroexpand-all]]))
+#+BEGIN_SRC clojure
+  (ns clojureschool.handler
+    (:require [clojure.walk :refer [macroexpand-all]]))
+  
+  (macroexpand-all '(defroutes app-routes
+    (GET "/" [] (counter-view (swap! counter inc)))
+    (route/resources "/")
+    (route/not-found "Not Found")))
+  
+#+END_SRC
 
-(macroexpand-all '(defroutes app-routes
-  (GET "/" [] (counter-view (swap! counter inc)))
-  (route/resources "/")
-  (route/not-found "Not Found")))
-
-=> (def app-routes
-  (compojure.core/routes
-   (compojure.core/make-route
-    :get
-    (clout.core/route-compile "/")
-    (fn* ([request__1478__auto__]
-            (let* []
-                  (counter-view (swap! counter inc))))))
-   (route/resources "/")
-   (route/not-found "Not Found")))
+#+BEGIN_SRC clojure
+  (def app-routes
+      (compojure.core/routes
+       (compojure.core/make-route
+        :get
+        (clout.core/route-compile "/")
+        (fn* ([request__1478__auto__]
+                (let* []
+                      (counter-view (swap! counter inc))))))
+       (route/resources "/")
+       (route/not-found "Not Found")))
+#+END_SRC
 
 * Left-handed Clojure
 
 What if Clojure wanted functions to come *after* their arguments? No problem!
 
-(ns clojureschool.handler
-  (:require [clojure.walk :refer [macroexpand-all prewalk]]))
-
-(defn reverse-if-list [expr]
-  (if (list? expr)
-    (reverse expr)
-    expr))
-
-(defmacro left-handed [expr]
-  (prewalk reverse-if-list expr))
+#+begin_src clojure
+  (ns clojureschool.handler
+    (:require [clojure.walk :refer [macroexpand-all prewalk]]))
+  
+  (defn reverse-if-list [expr]
+    (if (list? expr)
+      (reverse expr)
+      expr))
+  
+  (defmacro left-handed [expr]
+    (prewalk reverse-if-list expr))
+#+end_src
 
 Does it work?
 
+#+begin_src clojure
 (macroexpand-all
  '(left-handed
    ("Hello Mirror World" println)))
+#+end_src
 
 We can even nest expressions!
 
+#+begin_src clojure
 (left-handed ((1 1 +) "One plus one is " str))
+#+end_src
 
 * Why are macros useful?
 
@@ -88,7 +100,9 @@ Many core library functions are expressed using macros:
 
 e.g. and, or, when, while, for, cond
 
+#+begin_src clojure
 (macroexpand '(when true (println "It's true!")))
+#+end_src
 
 * Why are macros useful?
 
@@ -96,49 +110,422 @@ Also useful for replacing template code:
 
 with-open
 
+#+begin_src clojure
 (use 'clojure.java.io)
 (with-open [rdr (reader "/tmp/test.txt")]
   ;; Do something to file.
   ;; File will be closed automatically
-  ;; at the end of the expression)
+  ;; at the end of the expression
+)
+#+end_src
 
-* Why are macros useful?
 
-Or for reorganising code to make it more readable:
+* Exercise
 
-e.g. -> ->>
+#+begin_src clojure
 
-#+BEGIN_HTML
-<pre><code data-trim class="clojure">
+;; Re-write the below using -> threading macro
+(/ (* (+ 10 2) 5) (* 2 5))
+
+  
+;; Re-write the below using ->> threading macro
+(* 10 (apply + (map inc (range 10))))
+#+end_src
+
+* This week's project
+
+Last week we made a visitor counter, this week we'll make a chat application
+
+* The chat application
+
+#+begin_src bash
+lein new compojure chitter
+#+end_src
+
+
+Add a vew with a simple form to add chat messages.
+
+Messages are stored in an atom
+
+* The application so far...
+
+#+begin_src clojure
+(def messages (atom []))
+
+(defn index-view [messages]
+  (html5
+   [:body
+    [:h1 "Chitter Chat"]
+    [:form {:method "post"}
+     [:div [:textarea {:name "message"}]]
+     [:input {:type "submit" :value "Post Message"}]]
+    [:ul (for [message messages]
+           [:li message])]]))
+
+(GET "/" [] (index-view @messages))
+#+end_src
+
+
+* This should be familiar from last week
+
+* User data
+
+Add a POST route for dealing with user data
+
+#+begin_src clojure
+(POST "/" [message]
+        (-> messages (swap! conj message) index-view))
+#+end_src
+
+* This is synchronous
+
+If we're going to make a game, how can we do this without reloading the page?
+
+* We need to use a websocket-capable server
+
+Add these to dependencies..
+
+#+begin_src clojure
+[http-kit "2.0.0-SNAPSHOT"]
+[ring/ring-devel "1.1.8"]
+#+end_src
+
+... and a 'main' handler
+
+#+begin_src clojure
+  :main chitter.handler
+#+end_src
+
+... include the new server
+
+#+begin_src clojure
+[org.httpkit.server :refer [run-server]]
+#+end_src
+
+... and a main function to be called
+
+#+begin_src clojure
+(defn -main [& args]
+  (run-server app {:port 3000}))
+#+end_src
+
+
+* What have we done?
+
+We've completely replaced the server that our application runs within.
+
+Because our new server works with ring request/response maps, we don't have to do anything more.
+
+* Start up again
+
+This time execute `lein run`:
+
+lein run
+
+This will always execute the -main function in your handler. We have made this start the server.
+
+* Hot reloading
+
+We included ring-devel earlier, this was so we could enable code reloading.
+
+#+begin_src clojure
+[ring.middleware.reload :refer [wrap-reload]]
+#+end_src
+
+
+#+begin_src clojure
+(def app
+  (-> app-routes wrap-reload handler/site))
+#+end_src
+
+
+* Middleware
+
+Middleware are functions which are chained together and  adapt requests and/or responses
+
+
+#+begin_src clojure
+(defn wrap-log-request [handler]
+  (fn [req]
+    (println req)
+    (handler req)))
+
+(def app
+  (handler/site (wrap-log-request app-routes)))
+#+end_src
+
+
+* Middleware can be chained
+
+
+#+begin_src clojure
+(defn wrap-log-request [handler]
+  (fn [request]
+    (println request)
+    (handler request)))
+
+(defn wrap-log-response [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (println response)
+      response)))
+
+(def app
+  (handler/site (wrap-log-response (wrap-log-request app-routes))))
+#+end_src
+  
+* Threading macros
+
+
+#+begin_src clojure
 (def app
   (-> app-routes
       wrap-request-log
       wrap-response-log
       handler/site))
-</code></pre>
-#+END_HTML
-Compare with:
-#+BEGIN_HTML
-<pre><code data-trim class="clojure">
+
+;; Compared with...
+
 (def app
   (handler/site (wrap-response-log (wrap-request-log app-routes))))
-</code></pre>
-#+END_HTML
+#+end_src
 
+
+* Useful Middleware
+  e.g for JSON response
+
+#+begin_src clojure
+;; In project.clj
+:dependencies [[ring-middleware-format "0.3.1"] ...]
+#+end_src
+
+
+#+begin_src clojure
+(ns clojureschool.handler
+  (:require [ring.middleware.format :refer [wrap-restful-format]]))
+
+(def app
+  (-> app-routes
+      (wrap-restful-format :formats [:json-kw :edn])
+      handler/site))
+#+end_src
+
+This instructs ring to convert Clojure data structures to their JSON equivalent, or as edn format if the Accept header requests it.
+
+Also middleware for cookies, authentication, rate limiting, compression etc...
+
+
+* Async code
+
+#+begin_src clojure
+(macroexpand-all
+ '(with-channel request channel
+    (on-receive channel
+                (fn [data]
+                  (send! channel data)))))
+#+end_src
+
+Macro expands to...
+
+#+begin_src clojure
+(let* [channel (:async-channel request)]
+      (if (:websocket? request)
+        (let* [temp__4090__auto__ (clojure.core/get-in request [:headers "sec-websocket-key"])]
+              (if temp__4090__auto__
+                (let* [key__2755__auto__ temp__4090__auto__]
+                      (do (. channel sendHandshake {"Sec-WebSocket-Accept" (org.httpkit.server/accept key__2755__auto__)
+                                                    "Upgrade" "websocket"
+                                                    "Connection" "Upgrade"})
+                          (on-receive channel
+                                      (fn* ([data] (send! channel data))))
+                          {:body channel})) {:status 400
+                                             :body "Bad Sec-WebSocket-Key header"}))
+        (do (on-receive channel
+                        (fn* ([data] (send! channel data))))
+            {:body channel})))
+#+end_src
+
+
+* Websockets
+
+Websockets are long-lived connections between the client and the server through which messages can be sent in both directions.
+
+* In your browser's js console...
+
+#+begin_src js
+var socket = new WebSocket("ws://localhost:3000/echo");
+
+socket.onmessage = function(event) { console.log(event.data); }
+
+socket.send("Data to be sent");
+#+end_src
+
+You should see the data you sent echoed back.
 
 * Exercise
 
-#+BEGIN_HTML
-<pre><code data-trim class="clojure">
-;; Re-write the below using -> threading macro
-(/ (* (+ 10 2) 5) (* 2 5))
-</code></pre>
-#+END_HTML
+Make the server multi-client.
+
+Keep a list of connected clients and send each message to all clients.
+
+Test it out with two browser windows.
+
+* One I prepared earlier
+
+#+begin_src clojure
+(def clients (atom []))
+
+(defn make-socket! [request]
+  (with-channel request client
+    (swap! clients conj client)
+    (on-receive client
+                (fn [data]
+                  (doseq [a-client @clients]
+                    (send! a-client data))))))
+#+end_src
+
+* ClojureScript
+
+You can write client-side javascript in Clojure too!
+
+
+* Include Clojurescript in your project
+
+In dependencies... 
+
+#+begin_src clojure
+:dependencies [[org.clojure/clojurescript "0.0-XXXX"] ...]
+#+end_src
+
+Clojurescript is compiled, so add the compiler to your plugins...
+
+#+begin_src clojure
+:plugins [[lein-cljsbuild "1.0.1-SNAPSHOT"] ...]
+#+end_src
+
+... And tell cljsbuild where to put your compiled javascript:
+
+#+begin_src clojure
+:cljsbuild {:builds {:main {:compiler {:output-to "resources/public/js/main.js"}}}}
+#+end_src
+
+* Keeping the Clojure(Script) separate
+
+Next to your /src directory, create a /src-cljs/chitter directory
+
+This is where cljsbuild will look for clojurescript files by default
+
+* Writing your first ClojureScript
+
+Create the file
+
+/src-cljs/chitter/client.cljs
+
+#+begin_src clojure
+(ns chitter.client)
+
+(defn greet [name]
+  (str "Hello " name))
+#+end_src
+
+And visit...
+
+http://localhost:3000/js/main.js
+
+* Include this in our page
+
+#+begin_src clojure
+[hiccup.page :refer [html5 include-js]]
+#+end_src
+
+#+begin_src clojure
+(html5
+   [:head
+    (include-js "js/main.js")]
+   [:body ....
+   ])
+#+end_src
+
+* Reload the page...
+
+And in your console, type
+
+#+begin_src js
+chitter.client.greet("World");
+
+=> "Hello World"
+#+end_src
+
+* Adding messages manually
+
+#+begin_src clojure
+(ns chitter.client
+  (:require [dommy.core :as dommy])
+  (:use-macros [dommy.macros :only [node sel1]]))
+
+(defn main []
+  (let [socket (js/WebSocket. "ws://localhost:3000/echo")]
+    (set! (.-onmessage socket)
+          (fn [event]
+            (dommy/append! (sel1 :#messages)
+                           [:li (.-data event)])))
+    socket))
+#+end_src
+
+* Javascript Interop
+
+#+begin_src clojure
+(let [socket (js/WebSocket. "ws://localhost:3000/echo")] ...)
+#+end_src
+
+
+#+begin_src js
+var socket = new WebSocket("ws://localhost:3000/echo");
+#+end_src
+
+
+#+begin_src clojure
+(set! (.-onmessage socket) (fn [event] ...))
+#+end_src
+
+
+#+begin_src js
+socket.onmessage = function(event) { ... };
+#+end_src
+
+* Dealing with send and receive
+
+#+BEGIN_SRC clojure
+  (ns chitter.client
+    (:require [dommy.core :as dommy])
+    (:use-macros [dommy.macros :only [sel1]]))
   
-#+BEGIN_HTML
-<pre><code data-trim class="clojure">
-;; Re-write the below using ->> threading macro
-(* 10 (apply + (map inc (range 10))))
-</code></pre>
-#+END_HTML
+  (defn bind-send-event! [socket]
+    (let [button      (sel1 :#post)
+          message-box (sel1 :#message)]
+      (dommy/listen! button :click
+                     (fn [] (.send socket (.-value message-box))))))
+  
+  (defn bind-receive-event! [socket]
+    (set! (.-onmessage socket)
+          (fn [event]
+            (dommy/append! (sel1 :#messages)
+                           [:li (.-data event)]))))
+  
+  (defn main []
+    (let [socket (js/WebSocket. "ws://localhost:3000/echo")]
+      (bind-send-event! socket)
+      (bind-receive-event! socket)
+      socket))
+#+END_SRC
+
+* Load javascript on page load
+
+Add to bottom of page
+
+#+begin_src clojure
+    [:script "chitter.client.main()"]
+#+end_src
+
+
 
