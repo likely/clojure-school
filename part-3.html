@@ -595,7 +595,7 @@ In your REPL:
 </li>
 <li>Set off a go-loop that asynchronously prints every message
 </li>
-<li>Put messages on your channel
+<li>Put messages on your channel, and see them printed on the console!
 </li>
 </ul>
 </section>
@@ -614,7 +614,7 @@ You can write client-side JavaScript in Clojure too!
 
 <h2>Writing Clojurescript</h2>
 <p>
-Create the file
+Open the file
 </p>
 
 <p>
@@ -623,7 +623,8 @@ Create the file
 
 <div class="org-src-container">
 
-<pre class="src src-clojure">(<span style="color: #00ffff;">ns</span> sketchy.client)
+<pre class="src src-clojure">(<span style="color: #00ffff;">ns</span> sketchy.client
+  (<span style="color: #7fffd4;">:require</span> [...]))
 
 (<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">greet</span> [name]
   (<span style="color: #b0c4de;">str</span> <span style="color: #ffa07a;">"Hello "</span> name))
@@ -633,21 +634,6 @@ Create the file
 </section>
 <section>
 <section id="sec-30" >
-
-<h2>Include this in our page</h2>
-<div class="org-src-container">
-
-<pre class="src src-clojure">(html5
-   [<span style="color: #7fffd4;">:head</span>
-    (include-js <span style="color: #ffa07a;">"js/sketchy.js"</span>)]
-   [<span style="color: #7fffd4;">:body</span> ....
-   ])
-</pre>
-</div>
-</section>
-</section>
-<section>
-<section id="sec-31" >
 
 <h2>Reload the page</h2>
 <p>
@@ -664,7 +650,7 @@ And in your JavaScript console, type
 </section>
 </section>
 <section>
-<section id="sec-32" >
+<section id="sec-31" >
 
 <h2>Javascript Interop</h2>
 <p>
@@ -708,7 +694,7 @@ Access global javascript object
 </section>
 </section>
 <section>
-<section id="sec-33" >
+<section id="sec-32" >
 
 <h2>Exercise</h2>
 <p>
@@ -727,7 +713,7 @@ window.addEventListener(<span style="color: #ffa07a;">"mousemove"</span>,
 </section>
 </section>
 <section>
-<section id="sec-34" >
+<section id="sec-33" >
 
 <h2>Load JavaScript on page load</h2>
 <p>
@@ -750,7 +736,7 @@ We're calling a function called 'main' on page load.
 </section>
 </section>
 <section>
-<section id="sec-35" >
+<section id="sec-34" >
 
 <h2>Putting UI events on a channel</h2>
 <div class="org-src-container">
@@ -770,7 +756,7 @@ We're outside a go block so we can't use &gt;!. We use the asynchronous version 
 </section>
 </section>
 <section>
-<section id="sec-36" >
+<section id="sec-35" >
 
 <h2>Exercise</h2>
 <p>
@@ -779,7 +765,7 @@ Inside your main function, create a go loop that prints out the mousemoved event
 </section>
 </section>
 <section>
-<section id="sec-37" >
+<section id="sec-36" >
 
 <h2>Channels are like sequences</h2>
 <p>
@@ -801,7 +787,7 @@ See also map&gt;, reduce, filter&gt;, filter&lt;, remove&gt;, remove&lt;
 </section>
 </section>
 <section>
-<section id="sec-38" >
+<section id="sec-37" >
 
 <h2>Exercise</h2>
 <p>
@@ -810,7 +796,7 @@ Adapt your main function to print out a vector containing only the x and y compo
 </section>
 </section>
 <section>
-<section id="sec-39" >
+<section id="sec-38" >
 
 <h2>Drawing into the canvas</h2>
 <div class="org-src-container">
@@ -823,46 +809,83 @@ Adapt your main function to print out a vector containing only the x and y compo
 </section>
 </section>
 <section>
+<section id="sec-39" >
+
+<h2>Exercise (+ homework)</h2>
+<p>
+Using the functions we have so far - finish the drawing app!
+</p>
+
+<p>
+You'll need:
+</p>
+
+<ul class="org-ul">
+<li>3 event channels - listening to mousemove, mousedown and mouseup events respectively
+</li>
+<li>A go-loop inside your 'main' fn - to react to events on all 3 channels and draw points if the mouse is down (hint: 'alts!')
+</li>
+<li>Any problems - let us know! 
+</li>
+</ul>
+</section>
+</section>
+<section>
 <section id="sec-40" >
 
-<h2>Skip to the end</h2>
-<p>
-Combing channels with alts!
-</p>
-
-<p>
-loop recur
-</p>
-
-<p>
-condp
-</p>
-
-<pre class="example">
-(defn main []
-  (let [canvas (sel1 :#canvas)
-        move (map&lt; e-&gt;v (events canvas "mousemove"))
-        down (events canvas "mousedown")
-        up (events canvas "mouseup")]
-    (go
-     (let [ws (&lt;! (ws-ch "ws://localhost:3000/ws"))]
-       (go-loop []
-                (draw-point canvas (read-string (:message (&lt;! ws))))
-                (recur))
-       (go-loop [draw-point? false]
-                (let [[v sc] (alts! [move down up])]
-                  (condp = sc
-                    down (recur true)
-                    up (recur false)
-                    move (do (when draw-point?
-                               (js/console.log (pr-str v))
-                               (&gt;! ws v))
-                             (recur draw-point?)))))))))
-</pre>
+<h2>What we covered</h2>
+<ul class="org-ul">
+<li>Macros
+</li>
+<li>core.async
+</li>
+<li>ClojureScript
+</li>
+</ul>
 </section>
 </section>
 <section>
 <section id="sec-41" >
+
+<h2>Thank You</h2>
+</section>
+
+</section>
+<section>
+<section id="sec-42" >
+
+<h2>Not covered:</h2>
+</section>
+
+</section>
+<section>
+<section id="sec-43" >
+
+<h2>Skip to the end</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">main</span> []
+  (<span style="color: #00ffff;">let</span> [canvas (sel1 <span style="color: #7fffd4;">:#canvas</span>)
+        move (map&lt; e-&gt;v (events canvas <span style="color: #ffa07a;">"mousemove"</span>))
+        down (events canvas <span style="color: #ffa07a;">"mousedown"</span>)
+        up (events canvas <span style="color: #ffa07a;">"mouseup"</span>)]
+    (go-loop [draw-point? false]
+      (<span style="color: #00ffff;">let</span> [[v sc] (alts! [move down up])]
+        (<span style="color: #00ffff;">condp</span> = sc
+          down (<span style="color: #00ffff;">recur</span> true)
+          up (<span style="color: #00ffff;">recur</span> false)
+          move (<span style="color: #00ffff;">do</span> (<span style="color: #00ffff;">when</span> draw-point?
+                     (js/console.log (<span style="color: #b0c4de;">pr-str</span> v)))
+                   (<span style="color: #00ffff;">recur</span> draw-point?)))))))
+</pre>
+</div>
+</section>
+
+
+
+</section>
+<section>
+<section id="sec-44" >
 
 <h2>Websockets</h2>
 <p>
@@ -871,7 +894,7 @@ Websockets are long-lived connections between the client and the server through 
 </section>
 </section>
 <section>
-<section id="sec-42" >
+<section id="sec-45" >
 
 <h2>Creating a channel from a websocket</h2>
 <p>
@@ -891,7 +914,7 @@ Uncomment includes at the top of the handler
 </section>
 </section>
 <section>
-<section id="sec-43" >
+<section id="sec-46" >
 
 <h2>In your browser's js console&#x2026;</h2>
 <div class="org-src-container">
@@ -910,32 +933,12 @@ You should see the data you sent echoed back.
 </section>
 </section>
 <section>
-<section id="sec-44" >
+<section id="sec-47" >
 
 <h2>Create a collaborative drawing app!</h2>
 <p>
 Adapt the server side keep an atom of clients, return events to all of them.
 </p>
-</section>
-</section>
-<section>
-<section id="sec-45" >
-
-<h2>What we covered</h2>
-<ul class="org-ul">
-<li>Macros
-</li>
-<li>core.async
-</li>
-<li>ClojureScript
-</li>
-</ul>
-</section>
-</section>
-<section>
-<section id="sec-46" >
-
-<h2>Thank You</h2>
 </section>
 </section>
 </div>

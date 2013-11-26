@@ -359,25 +359,16 @@ You can write client-side JavaScript in Clojure too!
 
 * Writing Clojurescript
 
-Create the file
+Open the file
 
 /src/cljs/sketchy/client.cljs
 
 #+begin_src clojure
-(ns sketchy.client)
-
-(defn greet [name]
-  (str "Hello " name))
-#+end_src
-
-* Include this in our page
-
-#+begin_src clojure
-(html5
-   [:head
-    (include-js "js/sketchy.js")]
-   [:body ....
-   ])
+  (ns sketchy.client
+    (:require [...]))
+  
+  (defn greet [name]
+    (str "Hello " name))
 #+end_src
 
 * Reload the page
@@ -481,43 +472,53 @@ Adapt your main function to print out a vector containing only the x and y compo
 
 * Drawing into the canvas
 
-
 #+BEGIN_SRC clojure
 (defn draw-point [canvas [x y]]
   (let [context (.getContext canvas "2d")]
     (.fillRect context x y 10 10)))
 #+END_SRC
 
+* Exercise (+ homework)
+
+Using the functions we have so far - finish the drawing app!
+
+You'll need:
+
+- 3 event channels - listening to mousemove, mousedown and mouseup events respectively
+- A go-loop inside your 'main' fn - to react to events on all 3 channels and draw points if the mouse is down (hint: 'alts!')
+- Any problems - let us know! 
+
+* What we covered
+
+- Macros
+- core.async
+- ClojureScript
+
+* Thank You
+
+* Not covered:
+
 * Skip to the end
 
-Combing channels with alts!
-
-loop recur
-
-condp
-
-#+BEGIN_SRC 
-
-(defn main []
-  (let [canvas (sel1 :#canvas)
-        move (map< e->v (events canvas "mousemove"))
-        down (events canvas "mousedown")
-        up (events canvas "mouseup")]
-    (go
-     (let [ws (<! (ws-ch "ws://localhost:3000/ws"))]
-       (go-loop []
-                (draw-point canvas (read-string (:message (<! ws))))
-                (recur))
-       (go-loop [draw-point? false]
-                (let [[v sc] (alts! [move down up])]
-                  (condp = sc
-                    down (recur true)
-                    up (recur false)
-                    move (do (when draw-point?
-                               (js/console.log (pr-str v))
-                               (>! ws v))
-                             (recur draw-point?)))))))))
+#+BEGIN_SRC clojure
+  
+  (defn main []
+    (let [canvas (sel1 :#canvas)
+          move (map< e->v (events canvas "mousemove"))
+          down (events canvas "mousedown")
+          up (events canvas "mouseup")]
+      (go-loop [draw-point? false]
+        (let [[v sc] (alts! [move down up])]
+          (condp = sc
+            down (recur true)
+            up (recur false)
+            move (do (when draw-point?
+                       (js/console.log (pr-str v)))
+                     (recur draw-point?)))))))
 #+END_SRC
+
+
+
 
 * Websockets
   
@@ -552,10 +553,3 @@ You should see the data you sent echoed back.
 
 Adapt the server side keep an atom of clients, return events to all of them.
 
-* What we covered
-
-- Macros
-- core.async
-- ClojureScript
-
-* Thank You
