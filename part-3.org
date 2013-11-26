@@ -9,7 +9,15 @@
 
 * One I prepared earlier
 
-git://github.com/likely/sketchy.git
+#+begin_src sh
+git clone git://github.com/likely/sketchy.git
+cd sketchy
+lein start-server
+
+# To connect to the REPL:
+lein repl :connect 7888
+#+end_src
+
 
 * A quick refresher
 
@@ -304,9 +312,50 @@ Create a channel, 'put!' two values onto it, and use a 'go' block to print them 
     We made progress  
   #+END_SRC
 
+* Looping
+
+Clojure does have a 'loop' macro
+
+#+BEGIN_SRC clojure
+  (loop [a 1
+         b 10]
+    (when (< a b)
+      (prn {:a a :b b})
+      (recur (inc a) (dec b))))
+#+END_SRC
+
+* Application to channels
+
+Reading every message ever put on a channel:
+
+#+BEGIN_SRC clojure
+  (let [ch (a/chan)]
+    (go
+     (loop []
+       (when-let [msg (<! ch)]
+         (println "Message received! -" msg)
+         (recur)))))
+#+END_SRC
+
+'go' and 'loop' are used together so often, that there is a 'go-loop' short-hand:
+
+#+BEGIN_SRC clojure
+  (go-loop []
+    ;; ...
+    (recur))
+#+END_SRC 
+
+* Exercise:
+
+In your REPL:
+
+- Define a channel with (def my-chan (a/chan))
+- Set off a go-loop that asynchronously prints every message
+- Put messages on your channel
+
 * ClojureScript
 
-You can write client-side javascript in Clojure too!
+You can write client-side JavaScript in Clojure too!
 
 * Writing Clojurescript
 
@@ -333,7 +382,7 @@ Create the file
 
 * Reload the page
 
-And in your console, type
+And in your JavaScript console, type
 
 #+begin_src js
 chitter.client.greet("World");
@@ -349,6 +398,9 @@ Property access
 ;; obj.x becomes:
 
 (.-x obj)
+
+;; obj.x = y becomes:
+(set! (.-x obj) y)
 #+END_SRC
 
 Calling functions
@@ -384,18 +436,23 @@ window.addEventListener("mousemove",
 Add to bottom of ClojureScript:
 
 #+begin_src clojure
+(defn main []
+  ;; do something interesting
+  )
+
 (set! (.-onload js/window) main)
 #+end_src
 
 We're calling a function called 'main' on page load.
 
-* Creating UI channel
+* Putting UI events on a channel
 
 #+BEGIN_SRC clojure
   (defn events [el type]
     (let [out (chan)]
       (d/listen! el type
-                 (fn [e] (put! out e)))
+        (fn [e]
+          (put! out e)))
       out))
 #+END_SRC
 

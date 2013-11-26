@@ -24,10 +24,18 @@
 <section id="sec-1" >
 
 <h2>One I prepared earlier</h2>
-<p>
-git://github.com/likely/sketchy.git
-</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">git clone git://github.com/likely/sketchy.git
+<span style="color: #b0c4de;">cd</span> sketchy
+lein start-server
+
+<span style="color: #ff7f24;"># </span><span style="color: #ff7f24;">To connect to the REPL:</span>
+lein repl :connect 7888
+</pre>
+</div>
 </section>
+
 </section>
 <section>
 <section id="sec-2" >
@@ -526,14 +534,83 @@ user=&gt; (<span style="color: #00ffff;">let</span> [c (chan)]
 <section>
 <section id="sec-25" >
 
-<h2>ClojureScript</h2>
+<h2>Looping</h2>
 <p>
-You can write client-side javascript in Clojure too!
+Clojure does have a 'loop' macro
 </p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">loop</span> [a 1
+       b 10]
+  (<span style="color: #00ffff;">when</span> (<span style="color: #b0c4de;">&lt;</span> a b)
+    (<span style="color: #b0c4de;">prn</span> {<span style="color: #7fffd4;">:a</span> a <span style="color: #7fffd4;">:b</span> b})
+    (<span style="color: #00ffff;">recur</span> (<span style="color: #b0c4de;">inc</span> a) (<span style="color: #b0c4de;">dec</span> b))))
+</pre>
+</div>
 </section>
 </section>
 <section>
 <section id="sec-26" >
+
+<h2>Application to channels</h2>
+<p>
+Reading every message ever put on a channel:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [ch (a/chan)]
+  (go
+   (<span style="color: #00ffff;">loop</span> []
+     (<span style="color: #00ffff;">when-let</span> [msg (&lt;! ch)]
+       (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"Message received! -"</span> msg)
+       (<span style="color: #00ffff;">recur</span>)))))
+</pre>
+</div>
+
+<p>
+'go' and 'loop' are used together so often, that there is a 'go-loop' short-hand:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(go-loop []
+  <span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">...</span>
+  (<span style="color: #00ffff;">recur</span>))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-27" >
+
+<h2>Exercise:</h2>
+<p>
+In your REPL:
+</p>
+
+<ul class="org-ul">
+<li>Define a channel with (def my-chan (a/chan))
+</li>
+<li>Set off a go-loop that asynchronously prints every message
+</li>
+<li>Put messages on your channel
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-28" >
+
+<h2>ClojureScript</h2>
+<p>
+You can write client-side JavaScript in Clojure too!
+</p>
+</section>
+</section>
+<section>
+<section id="sec-29" >
 
 <h2>Writing Clojurescript</h2>
 <p>
@@ -555,7 +632,7 @@ Create the file
 </section>
 </section>
 <section>
-<section id="sec-27" >
+<section id="sec-30" >
 
 <h2>Include this in our page</h2>
 <div class="org-src-container">
@@ -570,11 +647,11 @@ Create the file
 </section>
 </section>
 <section>
-<section id="sec-28" >
+<section id="sec-31" >
 
 <h2>Reload the page</h2>
 <p>
-And in your console, type
+And in your JavaScript console, type
 </p>
 
 <div class="org-src-container">
@@ -587,7 +664,7 @@ And in your console, type
 </section>
 </section>
 <section>
-<section id="sec-29" >
+<section id="sec-32" >
 
 <h2>Javascript Interop</h2>
 <p>
@@ -599,6 +676,9 @@ Property access
 <pre class="src src-clojure"><span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">obj.x becomes:</span>
 
 (<span style="color: #b0c4de;">.-x</span> obj)
+
+<span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">obj.x = y becomes:</span>
+(set! (<span style="color: #b0c4de;">.-x</span> obj) y)
 </pre>
 </div>
 
@@ -628,7 +708,7 @@ Access global javascript object
 </section>
 </section>
 <section>
-<section id="sec-30" >
+<section id="sec-33" >
 
 <h2>Exercise</h2>
 <p>
@@ -647,7 +727,7 @@ window.addEventListener(<span style="color: #ffa07a;">"mousemove"</span>,
 </section>
 </section>
 <section>
-<section id="sec-31" >
+<section id="sec-34" >
 
 <h2>Load JavaScript on page load</h2>
 <p>
@@ -656,7 +736,11 @@ Add to bottom of ClojureScript:
 
 <div class="org-src-container">
 
-<pre class="src src-clojure">(set! (<span style="color: #b0c4de;">.-onload</span> js/window) main)
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">main</span> []
+  <span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">do something interesting</span>
+  )
+
+(set! (<span style="color: #b0c4de;">.-onload</span> js/window) main)
 </pre>
 </div>
 
@@ -666,15 +750,16 @@ We're calling a function called 'main' on page load.
 </section>
 </section>
 <section>
-<section id="sec-32" >
+<section id="sec-35" >
 
-<h2>Creating UI channel</h2>
+<h2>Putting UI events on a channel</h2>
 <div class="org-src-container">
 
 <pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">events</span> [el type]
   (<span style="color: #00ffff;">let</span> [out (chan)]
     (d/listen! el type
-               (<span style="color: #00ffff;">fn</span> [e] (put! out e)))
+      (<span style="color: #00ffff;">fn</span> [e]
+        (put! out e)))
     out))
 </pre>
 </div>
@@ -685,7 +770,7 @@ We're outside a go block so we can't use &gt;!. We use the asynchronous version 
 </section>
 </section>
 <section>
-<section id="sec-33" >
+<section id="sec-36" >
 
 <h2>Exercise</h2>
 <p>
@@ -694,7 +779,7 @@ Inside your main function, create a go loop that prints out the mousemoved event
 </section>
 </section>
 <section>
-<section id="sec-34" >
+<section id="sec-37" >
 
 <h2>Channels are like sequences</h2>
 <p>
@@ -716,7 +801,7 @@ See also map&gt;, reduce, filter&gt;, filter&lt;, remove&gt;, remove&lt;
 </section>
 </section>
 <section>
-<section id="sec-35" >
+<section id="sec-38" >
 
 <h2>Exercise</h2>
 <p>
@@ -725,7 +810,7 @@ Adapt your main function to print out a vector containing only the x and y compo
 </section>
 </section>
 <section>
-<section id="sec-36" >
+<section id="sec-39" >
 
 <h2>Drawing into the canvas</h2>
 <div class="org-src-container">
@@ -738,7 +823,7 @@ Adapt your main function to print out a vector containing only the x and y compo
 </section>
 </section>
 <section>
-<section id="sec-37" >
+<section id="sec-40" >
 
 <h2>Skip to the end</h2>
 <p>
@@ -777,7 +862,7 @@ condp
 </section>
 </section>
 <section>
-<section id="sec-38" >
+<section id="sec-41" >
 
 <h2>Websockets</h2>
 <p>
@@ -786,7 +871,7 @@ Websockets are long-lived connections between the client and the server through 
 </section>
 </section>
 <section>
-<section id="sec-39" >
+<section id="sec-42" >
 
 <h2>Creating a channel from a websocket</h2>
 <p>
@@ -806,7 +891,7 @@ Uncomment includes at the top of the handler
 </section>
 </section>
 <section>
-<section id="sec-40" >
+<section id="sec-43" >
 
 <h2>In your browser's js console&#x2026;</h2>
 <div class="org-src-container">
@@ -825,7 +910,7 @@ You should see the data you sent echoed back.
 </section>
 </section>
 <section>
-<section id="sec-41" >
+<section id="sec-44" >
 
 <h2>Create a collaborative drawing app!</h2>
 <p>
@@ -834,7 +919,7 @@ Adapt the server side keep an atom of clients, return events to all of them.
 </section>
 </section>
 <section>
-<section id="sec-42" >
+<section id="sec-45" >
 
 <h2>What we covered</h2>
 <ul class="org-ul">
@@ -848,7 +933,7 @@ Adapt the server side keep an atom of clients, return events to all of them.
 </section>
 </section>
 <section>
-<section id="sec-43" >
+<section id="sec-46" >
 
 <h2>Thank You</h2>
 </section>
