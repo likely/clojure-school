@@ -451,7 +451,7 @@ We're outside a go block so we can't use >!. We use the asynchronous version put
 
 * Exercise
 
-Inside your main function, create a go loop that prints out the mousemoved events
+Inside your main function, create a go loop that prints out the mousemove events
 
 * Channels are like sequences
 
