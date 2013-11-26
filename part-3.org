@@ -3,122 +3,106 @@
 #+Email: 
 
 #+REVEAL_EXTRA_CSS: css/zenburn.css
-#+REVEAL_THEME: solarized
+#+REVEAL_THEME: moon
 #+OPTIONS: num:nil toc:nil reveal_mathjax:t history:t
 #+REVEAL_TRANS: fade
 
+* One I prepared earlier
+
+  git://github.com/likely/sketchy.git
+
+* A quick refresher
+
+  - Requests and responses are just maps
+  - Handlers are functions for turning requests into responses
+  - Atoms allow state to be mutated with pure functions
+  - Changes are atomic and thread safe
+  - We proved this by starting threads with future
+
 * Today's lesson
 
-  - macros
-  - core.async
-  - clojurescript
+  - How does defroutes help turn requests into responses?
+  - What are other ways of dealing with concurrency?
+  - Can we use these ideas to make an interactive, multi-person app?
 
-* These are big topics!
+* We'll be covering
+  
+  - Macros
+  - core.async
+  - ClojureScript
+
+* Caveat: these are big topics!
 
 We could easily spend a day on each one.
 
 We'll give you an understanding of the basics, and hopefully the hunger to find out more.
 
-
-* What are Macros?
+* Macros
 
 A macro is just a function that receives its arguments *unevaluated* at compile time.
 
 Because the unevaluated arguments are *code*, macros can operate on the code as if it was data*.
 
-(* code is data)
+* Macros we've already used
+
+Compojure's `defroutes` is a macro.
+
+We can use `macroexpand` to inspect it.
+
+* Macroexpand
+
+You can use the function macroexpand and macroexpand-all to see the effect of macros.
+
+#+BEGIN_SRC clojure
+(macroexpand-all '(defroutes app-routes
+  (GET "/" [] (index-view (swap! counter inc)))
+  (GET "/ws" [] socket-handler)
+  (route/resources "/")
+  (route/not-found "Not Found")))
+#+END_SRC
 
 * Why are Macros? 
 
 If *functions* receive data and return new data,
 
 Macros receive *code* and return *new code*.
-
-Because the macro receives its code unevaluated, the code doesn't have to be valid Clojure. This is how macros can extend the language in new ways.
-
-
-* Examples
+  
+* Argument evaluation
   
 #+BEGIN_SRC clojure
-  (ns clojureschool.handler
-    (:require [clojure.walk :refer [macroexpand-all]]))
-  
-  (macroexpand-all '(defroutes app-routes
-    (GET "/" [] (counter-view (swap! counter inc)))
-    (route/resources "/")
-    (route/not-found "Not Found")))
-  
+(and (= 1 1) (println "Hello World"))
 #+END_SRC
+
+Is "Hello World" printed?
 
 #+BEGIN_SRC clojure
-  (def app-routes
-      (compojure.core/routes
-       (compojure.core/make-route
-        :get
-        (clout.core/route-compile "/")
-        (fn* ([request__1478__auto__]
-                (let* []
-                      (counter-view (swap! counter inc))))))
-       (route/resources "/")
-       (route/not-found "Not Found")))
+(and (= 1 0) (println "Hello World"))
 #+END_SRC
 
-* Left-handed Clojure
+Why?
 
-What if Clojure wanted functions to come *after* their arguments? No problem!
 
-#+begin_src clojure
-  (ns clojureschool.handler
-    (:require [clojure.walk :refer [macroexpand-all prewalk]]))
+* Exercise
+
+  What does the following expand to?
+
+  #+BEGIN_SRC clojure
+  (and (= 1 0) (println "Hello World"))
+  #+END_SRC
   
-  (defn reverse-if-list [expr]
-    (if (list? expr)
-      (reverse expr)
-      expr))
-  
-  (defmacro left-handed [expr]
-    (prewalk reverse-if-list expr))
-#+end_src
+* Other macros in Clojure.core
 
-Does it work?
+  and, or, when, while, for, cond, ->, ->>
 
-#+begin_src clojure
-(macroexpand-all
- '(left-handed
-   ("Hello Mirror World" println)))
-#+end_src
+  -> and ->> are the threading macros, they restructure code to make it more legible.
+ 
+* Exercise
 
-We can even nest expressions!
+  Re-write the view using threading
 
-#+begin_src clojure
-(left-handed ((1 1 +) "One plus one is " str))
-#+end_src
-
-* Why are macros useful?
-
-Many core library functions are expressed using macros:
-
-e.g. and, or, when, while, for, cond
-
-#+begin_src clojure
-(macroexpand '(when true (println "It's true!")))
-#+end_src
-
-* Why are macros useful?
-
-Also useful for replacing template code:
-
-with-open
-
-#+begin_src clojure
-(use 'clojure.java.io)
-(with-open [rdr (reader "/tmp/test.txt")]
-  ;; Do something to file.
-  ;; File will be closed automatically
-  ;; at the end of the expression
-)
-#+end_src
-
+  #+BEGIN_SRC clojure
+  (index-view (swap! counter inc))
+  #+END_SRC
 
 * Exercise
 
@@ -132,228 +116,86 @@ with-open
 (* 10 (apply + (map inc (range 10))))
 #+end_src
 
-* This week's project
+* Macro magic: core.async
 
-Last week we made a visitor counter, this week we'll make a chat application
+An implementation of Communicating Sequential Processes (CSP).
 
-* The chat application
+CSP is an old idea, but basis of concurrency in languages such as Google's Go.
 
-#+begin_src bash
-lein new compojure chitter
-#+end_src
+The processes are more lightweight than threads, suitable for parallel web apps.
 
-
-Add a vew with a simple form to add chat messages.
-
-Messages are stored in an atom
-
-* The application so far...
-
-#+begin_src clojure
-(def messages (atom []))
-
-(defn index-view [messages]
-  (html5
-   [:body
-    [:h1 "Chitter Chat"]
-    [:form {:method "post"}
-     [:div [:textarea {:name "message"}]]
-     [:input {:type "submit" :value "Post Message"}]]
-    [:ul (for [message messages]
-           [:li message])]]))
-
-(GET "/" [] (index-view @messages))
-#+end_src
-
-
-* This should be familiar from last week
-
-* User data
-
-Add a POST route for dealing with user data
-
-#+begin_src clojure
-(POST "/" [message]
-        (-> messages (swap! conj message) index-view))
-#+end_src
-
-* This is synchronous
-
-If we're going to make a game, how can we do this without reloading the page?
-
-* We need to use a websocket-capable server
-
-Add these to dependencies..
-
-#+begin_src clojure
-[http-kit "2.0.0-SNAPSHOT"]
-[ring/ring-devel "1.1.8"]
-#+end_src
-
-... and a 'main' handler
-
-#+begin_src clojure
-  :main chitter.handler
-#+end_src
-
-... include the new server
-
-#+begin_src clojure
-[org.httpkit.server :refer [run-server]]
-#+end_src
-
-... and a main function to be called
-
-#+begin_src clojure
-(defn -main [& args]
-  (run-server app {:port 3000}))
-#+end_src
-
-
-* What have we done?
-
-We've completely replaced the server that our application runs within.
-
-Because our new server works with ring request/response maps, we don't have to do anything more.
-
-* Start up again
-
-This time execute `lein run`:
-
-lein run
-
-This will always execute the -main function in your handler. We have made this start the server.
-
-* Hot reloading
-
-We included ring-devel earlier, this was so we could enable code reloading.
-
-#+begin_src clojure
-[ring.middleware.reload :refer [wrap-reload]]
-#+end_src
-
-
-#+begin_src clojure
-(def app
-  (-> app-routes wrap-reload handler/site))
-#+end_src
-
-
-* Middleware
-
-Middleware are functions which are chained together and  adapt requests and/or responses
-
-
-#+begin_src clojure
-(defn wrap-log-request [handler]
-  (fn [req]
-    (println req)
-    (handler req)))
-
-(def app
-  (handler/site (wrap-log-request app-routes)))
-#+end_src
-
-
-* Middleware can be chained
-
-
-#+begin_src clojure
-(defn wrap-log-request [handler]
-  (fn [request]
-    (println request)
-    (handler request)))
-
-(defn wrap-log-response [handler]
-  (fn [request]
-    (let [response (handler request)]
-      (println response)
-      response)))
-
-(def app
-  (handler/site (wrap-log-response (wrap-log-request app-routes))))
-#+end_src
+* Core Async
   
-* Threading macros
+  Inside a go block you can do what appear to be async synchronously.
+  
+  #+BEGIN_SRC clojure
+  (go 5)
+=> #<ManyToManyChannel clojure.core.async.impl.channels.ManyToManyChannel@30804b08>
+  #+END_SRC
+  
+  Take accepts a channel and returns a value from it. It needs to be inside a go block.
 
+  #+BEGIN_SRC clojure
+  user> (go (println (<! (go 5))))
+#<ManyToManyChannel clojure.core.async.impl.channels.ManyToManyChannel@5636e34>
+5
+  #+END_SRC
 
-#+begin_src clojure
-(def app
-  (-> app-routes
-      wrap-request-log
-      wrap-response-log
-      handler/site))
+  See also: >!
 
-;; Compared with...
+* Synchronous
+  
+  The semantics of CSP are that takes and puts are synchronous.
+  If you take, it will block until something puts.
+  It you put, it will block until something takes.
+  #+BEGIN_SRC clojure
+    (let [c (chan)]
+      (go
+       (println "We are here")
+       (<! c)
+       (println "We won't get here")))
+  #+END_SRC
 
-(def app
-  (handler/site (wrap-response-log (wrap-request-log app-routes))))
-#+end_src
+* Channels
 
-
-* Useful Middleware
-  e.g for JSON response
-
-#+begin_src clojure
-;; In project.clj
-:dependencies [[ring-middleware-format "0.3.1"] ...]
-#+end_src
-
-
-#+begin_src clojure
-(ns clojureschool.handler
-  (:require [ring.middleware.format :refer [wrap-restful-format]]))
-
-(def app
-  (-> app-routes
-      (wrap-restful-format :formats [:json-kw :edn])
-      handler/site))
-#+end_src
-
-This instructs ring to convert Clojure data structures to their JSON equivalent, or as edn format if the Accept header requests it.
-
-Also middleware for cookies, authentication, rate limiting, compression etc...
-
-
-* Async code
-
-#+begin_src clojure
-(macroexpand-all
- '(with-channel request channel
-    (on-receive channel
-                (fn [data]
-                  (send! channel data)))))
-#+end_src
-
-Macro expands to...
-
-#+begin_src clojure
-(let* [channel (:async-channel request)]
-      (if (:websocket? request)
-        (let* [temp__4090__auto__ (clojure.core/get-in request [:headers "sec-websocket-key"])]
-              (if temp__4090__auto__
-                (let* [key__2755__auto__ temp__4090__auto__]
-                      (do (. channel sendHandshake {"Sec-WebSocket-Accept" (org.httpkit.server/accept key__2755__auto__)
-                                                    "Upgrade" "websocket"
-                                                    "Connection" "Upgrade"})
-                          (on-receive channel
-                                      (fn* ([data] (send! channel data))))
-                          {:body channel})) {:status 400
-                                             :body "Bad Sec-WebSocket-Key header"}))
-        (do (on-receive channel
-                        (fn* ([data] (send! channel data))))
-            {:body channel})))
-#+end_src
-
+  Channels allow goroutines to talk to each other.
+  
+  #+BEGIN_SRC clojure
+  ;; Order doesn't matter
+        (let [c (chan)]
+          (go
+           (>! c "A message"))
+          (go
+           (println "We are here")
+           (<! c)
+           (println "We made progress")))
+    
+        We are here
+    #<ManyToManyChannel clojure.core.async.impl.channels.ManyToManyChannel@27d198c3>
+    We made progress  
+  #+END_SRC
 
 * Websockets
+  
+  Websockets are long-lived connections between the client and the server through which messages can be sent in both directions.
 
-Websockets are long-lived connections between the client and the server through which messages can be sent in both directions.
+* Creating a channel from a websocket
+
+  Uncomment includes at the top of the handler
+
+  #+BEGIN_SRC clojure
+  (defn socket-handler [request]
+  (with-channel request ws-ch
+    (go-loop []
+      (let [{:keys [message]} (<! ws-ch)]
+        (>! ws-ch message)
+        (recur)))))
+  #+END_SRC
 
 * In your browser's js console...
 
 #+begin_src js
-var socket = new WebSocket("ws://localhost:3000/echo");
+var socket = new WebSocket("ws://localhost:3000/ws");
 
 socket.onmessage = function(event) { console.log(event.data); }
 
@@ -362,91 +204,34 @@ socket.send("Data to be sent");
 
 You should see the data you sent echoed back.
 
-* Exercise
-
-Make the server multi-client.
-
-Keep a list of connected clients and send each message to all clients.
-
-Test it out with two browser windows.
-
-* One I prepared earlier
-
-#+begin_src clojure
-(def clients (atom []))
-
-(defn make-socket! [request]
-  (with-channel request client
-    (swap! clients conj client)
-    (on-receive client
-                (fn [data]
-                  (doseq [a-client @clients]
-                    (send! a-client data))))))
-#+end_src
-
 * ClojureScript
 
 You can write client-side javascript in Clojure too!
 
-
-* Include Clojurescript in your project
-
-In dependencies... 
-
-#+begin_src clojure
-:dependencies [[org.clojure/clojurescript "0.0-XXXX"] ...]
-#+end_src
-
-Clojurescript is compiled, so add the compiler to your plugins...
-
-#+begin_src clojure
-:plugins [[lein-cljsbuild "1.0.1-SNAPSHOT"] ...]
-#+end_src
-
-... And tell cljsbuild where to put your compiled javascript:
-
-#+begin_src clojure
-:cljsbuild {:builds {:main {:compiler {:output-to "resources/public/js/main.js"}}}}
-#+end_src
-
-* Keeping the Clojure(Script) separate
-
-Next to your /src directory, create a /src-cljs/chitter directory
-
-This is where cljsbuild will look for clojurescript files by default
-
-* Writing your first ClojureScript
+* Writing Clojurescript
 
 Create the file
 
-/src-cljs/chitter/client.cljs
+/src/cljs/sketchy/client.cljs
 
 #+begin_src clojure
-(ns chitter.client)
+(ns sketchy.client)
 
 (defn greet [name]
   (str "Hello " name))
 #+end_src
 
-And visit...
-
-http://localhost:3000/js/main.js
-
 * Include this in our page
-
-#+begin_src clojure
-[hiccup.page :refer [html5 include-js]]
-#+end_src
 
 #+begin_src clojure
 (html5
    [:head
-    (include-js "js/main.js")]
+    (include-js "js/sketchy.js")]
    [:body ....
    ])
 #+end_src
 
-* Reload the page...
+* Reload the page
 
 And in your console, type
 
@@ -456,76 +241,135 @@ chitter.client.greet("World");
 => "Hello World"
 #+end_src
 
-* Adding messages manually
-
-#+begin_src clojure
-(ns chitter.client
-  (:require [dommy.core :as dommy])
-  (:use-macros [dommy.macros :only [node sel1]]))
-
-(defn main []
-  (let [socket (js/WebSocket. "ws://localhost:3000/echo")]
-    (set! (.-onmessage socket)
-          (fn [event]
-            (dommy/append! (sel1 :#messages)
-                           [:li (.-data event)])))
-    socket))
-#+end_src
-
 * Javascript Interop
 
-#+begin_src clojure
-(let [socket (js/WebSocket. "ws://localhost:3000/echo")] ...)
-#+end_src
-
-
-#+begin_src js
-var socket = new WebSocket("ws://localhost:3000/echo");
-#+end_src
-
-
-#+begin_src clojure
-(set! (.-onmessage socket) (fn [event] ...))
-#+end_src
-
-
-#+begin_src js
-socket.onmessage = function(event) { ... };
-#+end_src
-
-* Dealing with send and receive
+Property access
 
 #+BEGIN_SRC clojure
-  (ns chitter.client
-    (:require [dommy.core :as dommy])
-    (:use-macros [dommy.macros :only [sel1]]))
-  
-  (defn bind-send-event! [socket]
-    (let [button      (sel1 :#post)
-          message-box (sel1 :#message)]
-      (dommy/listen! button :click
-                     (fn [] (.send socket (.-value message-box))))))
-  
-  (defn bind-receive-event! [socket]
-    (set! (.-onmessage socket)
-          (fn [event]
-            (dommy/append! (sel1 :#messages)
-                           [:li (.-data event)]))))
-  
-  (defn main []
-    (let [socket (js/WebSocket. "ws://localhost:3000/echo")]
-      (bind-send-event! socket)
-      (bind-receive-event! socket)
-      socket))
+;; obj.x becomes:
+
+(.-x obj)
+#+END_SRC
+
+Calling functions
+
+#+BEGIN_SRC clojure
+;; obj.call(something);
+
+(.call obj something)
+#+END_SRC
+
+Access global javascript object
+
+#+BEGIN_SRC clojure
+;; console.log("message") becomes:
+
+(js/console.log "message")
+#+END_SRC
+
+* Exercise
+
+Create an event handler in ClojureScript that will print out the mouse coordinates.
+
+#+BEGIN_SRC js
+// In javascript this would be
+window.addEventListener("mousemove",
+  function(event) { 
+    console.log(event);
+  });
 #+END_SRC
 
 * Load javascript on page load
 
-Add to bottom of page
+Add to bottom of ClojureScript:
 
 #+begin_src clojure
-    [:script "chitter.client.main()"]
+(set! (.-onload js/window) main)
 #+end_src
 
+We're calling a function called 'main' on page load.
+
+* Creating UI channel
+
+#+BEGIN_SRC clojure
+  (defn events [el type]
+    (let [out (chan)]
+      (d/listen! el type
+                 (fn [e] (put! out e)))
+      out))
+#+END_SRC
+
+We're outside a go block so we can't use >!. We use the asynchronous version put!
+
+* Exercise
+
+Inside your main function, create a go loop that prints out the mousemoved events
+
+* Channels are like sequences
+
+They have map and reduce too!
+
+#+BEGIN_SRC clojure
+;; Takes a function and a source channel, and returns a channel which
+;; contains the values produced by applying f to each value taken from
+;; the source channel
+(map< some-fn some-channel)
+#+END_SRC
+
+See also map>, reduce, filter>, filter<, remove>, remove<
+
+* Exercise
+
+Adapt your main function to print out a vector containing only the x and y components of the mousemove event.
+
+* Drawing into the canvas
 
 
+#+BEGIN_SRC clojure
+(defn draw-point [canvas [x y]]
+  (let [context (.getContext canvas "2d")]
+    (.fillRect context x y 10 10)))
+#+END_SRC
+
+* Skip to the end
+
+Combing channels with alts!
+
+loop recur
+
+condp
+
+#+BEGIN_SRC 
+
+(defn main []
+  (let [canvas (sel1 :#canvas)
+        move (map< e->v (events canvas "mousemove"))
+        down (events canvas "mousedown")
+        up (events canvas "mouseup")]
+    (go
+     (let [ws (<! (ws-ch "ws://localhost:3000/ws"))]
+       (go-loop []
+                (draw-point canvas (read-string (:message (<! ws))))
+                (recur))
+       (go-loop [draw-point? false]
+                (let [[v sc] (alts! [move down up])]
+                  (condp = sc
+                    down (recur true)
+                    up (recur false)
+                    move (do (when draw-point?
+                               (js/console.log (pr-str v))
+                               (>! ws v))
+                             (recur draw-point?)))))))))
+#+END_SRC
+
+* Create a collaborative drawing app!
+
+Adapt the server side keep an atom of clients, return events to all of them.
+
+* What we covered
+
+- Macros
+- core.async
+- ClojureScript
+
+* Thank You
