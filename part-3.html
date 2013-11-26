@@ -794,9 +794,33 @@ See also map&gt;, reduce, filter&gt;, filter&lt;, remove&gt;, remove&lt;
 Adapt your main function to print out a vector containing only the x and y components of the mousemove event.
 </p>
 </section>
+
 </section>
 <section>
 <section id="sec-38" >
+
+<h2>Reading from more than one channel</h2>
+<p>
+core.async has a function 'alts!', that takes multiple channels, and
+returns the first message from <b>any</b> of those channels:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [ch-1 (a/chan)
+      ch-2 (a/chan)]
+  (go-loop []
+    (<span style="color: #00ffff;">let</span> [[v c] (a/alts! [ch-1 ch-2])]
+      (<span style="color: #00ffff;">if</span> (<span style="color: #b0c4de;">=</span> c ch-1)
+        (handle-message-from-ch-1 ...)
+        (handle-message-from-ch-2 ...))
+      (<span style="color: #00ffff;">recur</span>))))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-39" >
 
 <h2>Drawing into the canvas</h2>
 <div class="org-src-container">
@@ -809,7 +833,7 @@ Adapt your main function to print out a vector containing only the x and y compo
 </section>
 </section>
 <section>
-<section id="sec-39" >
+<section id="sec-40" >
 
 <h2>Exercise (+ homework)</h2>
 <p>
@@ -831,7 +855,7 @@ You'll need:
 </section>
 </section>
 <section>
-<section id="sec-40" >
+<section id="sec-41" >
 
 <h2>What we covered</h2>
 <ul class="org-ul">
@@ -845,21 +869,21 @@ You'll need:
 </section>
 </section>
 <section>
-<section id="sec-41" >
+<section id="sec-42" >
 
 <h2>Thank You</h2>
 </section>
 
 </section>
 <section>
-<section id="sec-42" >
+<section id="sec-43" >
 
 <h2>Not covered:</h2>
 </section>
 
 </section>
 <section>
-<section id="sec-43" >
+<section id="sec-44" >
 
 <h2>Skip to the end</h2>
 <div class="org-src-container">
@@ -885,7 +909,7 @@ You'll need:
 
 </section>
 <section>
-<section id="sec-44" >
+<section id="sec-45" >
 
 <h2>Websockets</h2>
 <p>
@@ -894,7 +918,7 @@ Websockets are long-lived connections between the client and the server through 
 </section>
 </section>
 <section>
-<section id="sec-45" >
+<section id="sec-46" >
 
 <h2>Creating a channel from a websocket</h2>
 <p>
@@ -914,7 +938,7 @@ Uncomment includes at the top of the handler
 </section>
 </section>
 <section>
-<section id="sec-46" >
+<section id="sec-47" >
 
 <h2>In your browser's js console&#x2026;</h2>
 <div class="org-src-container">
@@ -933,7 +957,7 @@ You should see the data you sent echoed back.
 </section>
 </section>
 <section>
-<section id="sec-47" >
+<section id="sec-48" >
 
 <h2>Create a collaborative drawing app!</h2>
 <p>

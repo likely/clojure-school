@@ -470,6 +470,22 @@ See also map>, reduce, filter>, filter<, remove>, remove<
 
 Adapt your main function to print out a vector containing only the x and y components of the mousemove event.
 
+
+* Reading from more than one channel
+core.async has a function 'alts!', that takes multiple channels, and
+returns the first message from *any* of those channels:
+
+#+BEGIN_SRC clojure
+  (let [ch-1 (a/chan)
+        ch-2 (a/chan)]
+    (go-loop []
+      (let [[v c] (a/alts! [ch-1 ch-2])]
+        (if (= c ch-1)
+          (handle-message-from-ch-1 ...)
+          (handle-message-from-ch-2 ...))
+        (recur))))
+#+END_SRC
+
 * Drawing into the canvas
 
 #+BEGIN_SRC clojure
