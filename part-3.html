@@ -91,89 +91,166 @@ We'll give you an understanding of the basics, and hopefully the hunger to find 
 <section>
 <section id="sec-6" >
 
+<h2>In LISPs, (= Code Data)</h2>
+<p>
+(inc 0) is simply a list of two elements - the symbol 'inc', and the value '0'.
+</p>
+
+<p>
+The REPL evaluates lists by treating the first argument as a function, and the rest as arguments to that function:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; (<span style="color: #b0c4de;">inc</span> 0)
+1
+</pre>
+</div>
+
+<p>
+We can ask the REPL not to eval a form by quoting it:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; '(<span style="color: #b0c4de;">inc</span> 0)
+(<span style="color: #b0c4de;">inc</span> 0)
+</pre>
+</div>
+
+<p>
+This is why you needed to quote 'requires' in the first week - to stop the REPL trying to evaluate it!
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; (<span style="color: #b0c4de;">require</span> '[clj-http.core <span style="color: #7fffd4;">:reload</span> <span style="color: #7fffd4;">:all</span>])
+nil
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-7" >
+
+<h2>Exercise</h2>
+<p>
+Try this on a 'defn' from last week - what does it return (literally)?
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; '(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">your-fn</span> [your-params] (do-something ...))
+???
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-8" >
+
+<h2>Eval is the opposite of quote</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; (<span style="color: #b0c4de;">eval</span> '(<span style="color: #b0c4de;">inc</span> 0))
+1
+</pre>
+</div>
+
+<p>
+This is what the REPL is doing to your code!
+</p>
+</section>
+</section>
+<section>
+<section id="sec-9" >
+
 <h2>Macros</h2>
 <p>
 A macro is just a function that receives its arguments <b>unevaluated</b> at compile time.
 </p>
 
 <p>
-Because the unevaluated arguments are <b>code</b>, macros can operate on the code as if it was data*.
-</p>
-</section>
-</section>
-<section>
-<section id="sec-7" >
-
-<h2>Macros we've already used</h2>
-<p>
-Compojure's `defroutes` is a macro.
-</p>
-
-<p>
-We can use `macroexpand` to inspect it.
-</p>
-</section>
-</section>
-<section>
-<section id="sec-8" >
-
-<h2>Macroexpand</h2>
-<p>
-You can use the function macroexpand and macroexpand-all to see the effect of macros.
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-clojure">(<span style="color: #00ff00;">macroexpand-all</span> '(<span style="color: #00ffff; font-weight: bold;">defroutes</span> <span style="color: #0000ff; font-weight: bold;">app-routes</span>
-  (<span style="color: #0000ff; font-weight: bold;">GET</span> <span style="color: #00ff00;">"/"</span> [] (index-view (<span style="color: #0000ff; font-weight: bold;">swap!</span> counter inc)))
-  (<span style="color: #0000ff; font-weight: bold;">GET</span> <span style="color: #00ff00;">"/ws"</span> [] socket-handler)
-  (route/resources <span style="color: #00ff00;">"/"</span>)
-  (route/not-found <span style="color: #00ff00;">"Not Found"</span>)))
-</pre>
-</div>
-</section>
-</section>
-<section>
-<section id="sec-9" >
-
-<h2>Why are Macros?</h2>
-<p>
-If <b>functions</b> receive data and return new data,
-</p>
-
-<p>
-Macros receive <b>code</b> and return <b>new code</b>.
+Because the unevaluated arguments are <b>code</b>, macros can operate on the code <b>as if it were data</b>.
 </p>
 </section>
 </section>
 <section>
 <section id="sec-10" >
 
-<h2>Argument evaluation</h2>
-<div class="org-src-container">
-
-<pre class="src src-clojure">(<span style="color: #00ffff; font-weight: bold;">and</span> (<span style="color: #0000ff; font-weight: bold;">=</span> 1 1) (<span style="color: #0000ff; font-weight: bold;">println</span> <span style="color: #00ff00;">"Hello World"</span>))
-</pre>
-</div>
+<h2>Macros we've already used</h2>
+<p>
+'when', 'and' and 'or' are macros - because they need to control the execution order of their parameters.
+</p>
 
 <p>
-Is "Hello World" printed?
+If 'when' were a function, it could be implemented thus:
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-clojure">(<span style="color: #00ffff; font-weight: bold;">and</span> (<span style="color: #0000ff; font-weight: bold;">=</span> 1 0) (<span style="color: #0000ff; font-weight: bold;">println</span> <span style="color: #00ff00;">"Hello World"</span>))
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">bad-when</span> [test &amp; then]
+  (<span style="color: #00ffff;">if</span> test
+    then
+    nil))
 </pre>
 </div>
 
 <p>
-Why?
+But look what happens when the test is false:
 </p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; (bad-when (<span style="color: #b0c4de;">=</span> 1 0)
+         (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"uh oh!"</span>))
+uh oh!
+nil
+</pre>
+</div>
 </section>
-
 </section>
 <section>
 <section id="sec-11" >
+
+<h2></h2>
+<p>
+Because functions' parameters are evaluated before the function is called, we will always evaluate the 'then' block! 
+</p>
+
+<p>
+<b>This will not do!</b>
+</p>
+
+<p>
+So 'when' <b>must</b> be a macro.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-12" >
+
+<h2>Macroexpand</h2>
+<p>
+You can use the function macroexpand and macroexpand-1 to see the effect of macros (indentation mine):
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; (<span style="color: #b0c4de;">macroexpand-1</span> '(<span style="color: #00ffff;">when</span> (<span style="color: #b0c4de;">=</span> 1 0)
+                             (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"uh oh!"</span>)
+                             (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"this isn't good!"</span>)))
+
+(<span style="color: #00ffff;">if</span> (<span style="color: #b0c4de;">=</span> 1 0)
+  (<span style="color: #00ffff;">do</span>
+    (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"uh oh!"</span>)
+    (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"this isn't good!"</span>)))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-13" >
 
 <h2>Exercise</h2>
 <p>
@@ -182,35 +259,7 @@ What does the following expand to?
 
 <div class="org-src-container">
 
-<pre class="src src-clojure">(<span style="color: #00ffff; font-weight: bold;">and</span> (<span style="color: #0000ff; font-weight: bold;">=</span> 1 0) (<span style="color: #0000ff; font-weight: bold;">println</span> <span style="color: #00ff00;">"Hello World"</span>))
-</pre>
-</div>
-</section>
-</section>
-<section>
-<section id="sec-12" >
-
-<h2>Other macros in Clojure.core</h2>
-<p>
-and, or, when, while, for, cond, -&gt;, -&gt;&gt;
-</p>
-
-<p>
--&gt; and -&gt;&gt; are the threading macros, they restructure code to make it more legible.
-</p>
-</section>
-</section>
-<section>
-<section id="sec-13" >
-
-<h2>Exercise</h2>
-<p>
-Re-write the view using threading
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-clojure">(index-view (<span style="color: #0000ff; font-weight: bold;">swap!</span> counter inc))
+<pre class="src src-clojure">(<span style="color: #00ffff;">and</span> (<span style="color: #b0c4de;">=</span> 1 0) (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"Hello World"</span>))
 </pre>
 </div>
 </section>
@@ -218,21 +267,65 @@ Re-write the view using threading
 <section>
 <section id="sec-14" >
 
-<h2>Exercise</h2>
+<h2>Other macros in Clojure.core</h2>
+<p>
+and, or, when, while, for, cond, -&gt;, -&gt;&gt;
+</p>
+
+<p>
+-&gt; and -&gt;&gt; are the threading macros - they restructure heavily nested code to make it more legible:
+</p>
+</section>
+</section>
+<section>
+<section id="sec-15" >
+
+<h2>Threading macros</h2>
 <div class="org-src-container">
 
-<pre class="src src-clojure"><span style="color: #ff0000;">;; </span><span style="color: #ff0000;">Re-write the below using -&gt; threading macro</span>
-(<span style="color: #0000ff; font-weight: bold;">/</span> (<span style="color: #0000ff; font-weight: bold;">*</span> (<span style="color: #0000ff; font-weight: bold;">+</span> 10 2) 5) (<span style="color: #0000ff; font-weight: bold;">*</span> 2 5))
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [my-map {<span style="color: #7fffd4;">:b</span> 2
+              <span style="color: #7fffd4;">:c</span> {<span style="color: #7fffd4;">:d</span> 3
+                  <span style="color: #7fffd4;">:e</span> 5}}]
+  (<span style="color: #b0c4de;">vals</span> (<span style="color: #b0c4de;">update-in</span> (<span style="color: #b0c4de;">assoc</span> my-map <span style="color: #7fffd4;">:b</span> 3) [<span style="color: #7fffd4;">:c</span> <span style="color: #7fffd4;">:e</span>] inc)))
+<span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">could be better written as</span>
+(<span style="color: #00ffff;">-&gt;</span> {<span style="color: #7fffd4;">:b</span> 2
+     <span style="color: #7fffd4;">:c</span> {<span style="color: #7fffd4;">:d</span> 3
+         <span style="color: #7fffd4;">:e</span> 5}}
+    (<span style="color: #b0c4de;">assoc</span> <span style="color: #7fffd4;">:b</span> 3)
+    (<span style="color: #b0c4de;">update-in</span> [<span style="color: #7fffd4;">:c</span> <span style="color: #7fffd4;">:e</span>] inc)
+    vals)
+</pre>
+</div>
 
+<div class="org-src-container">
 
-<span style="color: #ff0000;">;; </span><span style="color: #ff0000;">Re-write the below using -&gt;&gt; threading macro</span>
-(<span style="color: #0000ff; font-weight: bold;">*</span> 10 (<span style="color: #0000ff; font-weight: bold;">apply</span> + (<span style="color: #0000ff; font-weight: bold;">map</span> inc (<span style="color: #0000ff; font-weight: bold;">range</span> 10))))
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [forecast-days (forecast <span style="color: #ffa07a;">"london,uk"</span> {<span style="color: #7fffd4;">:cnt</span> 10})]
+  (<span style="color: #b0c4de;">count</span> (<span style="color: #b0c4de;">remove</span> cloudy? forecast-days)))
+<span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">could be written as:</span>
+(<span style="color: #00ffff;">-&gt;&gt;</span> (forecast <span style="color: #ffa07a;">"london,uk"</span> {<span style="color: #7fffd4;">:cnt</span> 10})
+     (<span style="color: #b0c4de;">remove</span> cloudy?)
+     count)
 </pre>
 </div>
 </section>
 </section>
 <section>
-<section id="sec-15" >
+<section id="sec-16" >
+
+<h2>Exercise</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure"><span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">Re-write the below using -&gt; threading macro</span>
+(<span style="color: #b0c4de;">/</span> (<span style="color: #b0c4de;">*</span> (<span style="color: #b0c4de;">+</span> 10 2) 5) (<span style="color: #b0c4de;">*</span> 2 5))
+
+<span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">Re-write the below using -&gt;&gt; threading macro</span>
+(<span style="color: #b0c4de;">*</span> 10 (<span style="color: #b0c4de;">apply</span> + (<span style="color: #b0c4de;">map</span> inc (<span style="color: #b0c4de;">range</span> 10))))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-17" >
 
 <h2>Macro magic: core.async</h2>
 <p>
@@ -244,34 +337,101 @@ CSP is an old idea, but basis of concurrency in languages such as Google's Go.
 </p>
 
 <p>
-The processes are more lightweight than threads, suitable for parallel web apps.
+The processes are more lightweight than threads, suitable for highly parallel web apps.
 </p>
 </section>
 </section>
 <section>
-<section id="sec-16" >
+<section id="sec-18" >
 
-<h2>Core Async</h2>
+<h2>core.async</h2>
 <p>
-Inside a go block you can do what appear to be async synchronously.
+<b>Channels</b> are the fundamental building blocks of core.async:
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-clojure">  (go 5)
-=&gt; #&lt;<span style="color: #0000ff; font-weight: bold;">ManyToManyChannel</span> clojure.core.async.impl.channels.ManyToManyChannel@30804b08&gt;
+<pre class="src src-clojure">user=&gt; (<span style="color: #b0c4de;">require</span> '[clojure.core.async <span style="color: #7fffd4;">:as</span> a])
+nil
+
+user=&gt; (a/chan)
+#&lt;<span style="color: #b0c4de;">ManyToManyChannel</span> clojure.core.async.impl.channels.ManyToManyChannel@30804b08&gt;
 </pre>
 </div>
 
 <p>
-Take accepts a channel and returns a value from it. It needs to be inside a go block.
+Normally, all operations on channels are blocking, but (so that we can
+test the examples on the upcoming slides) we can asynchronously put a
+value on a channel with 'put!':
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-clojure">  user&gt; (go (<span style="color: #0000ff; font-weight: bold;">println</span> (&lt;! (go 5))))
-#&lt;<span style="color: #0000ff; font-weight: bold;">ManyToManyChannel</span> clojure.core.async.impl.channels.ManyToManyChannel@5636e34&gt;
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [out (a/chan)]
+  (put! out 5)
+  out)
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-19" >
+
+<h2>Go!</h2>
+<p>
+Operations in core.async are usually found within 'go' blocks.
+</p>
+
+<p>
+A 'go' block transparently translates your beautiful synchronous code
+into the asynchronous callback-hell-style code you would have had to
+write otherwise.
+</p>
+
+<p>
+'Go' blocks return a channel eventually containing a single value - the result of the 'go' block:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">user=&gt; (go 5)
+#&lt;<span style="color: #b0c4de;">ManyToManyChannel</span> clojure.core.async.impl.channels.ManyToManyChannel@30804b08&gt;
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-20" >
+
+<h2>Taking from a channel</h2>
+<p>
+On the surface, &lt;! ('take') appears to accept a channel and synchronously return a value from it. 
+</p>
+
+<p>
+&lt;! must be used inside a go block.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">user&gt; (go
+       (<span style="color: #00ffff;">let</span> [value (&lt;! (go 5))]
+         (<span style="color: #b0c4de;">println</span> value)))
+#&lt;<span style="color: #b0c4de;">ManyToManyChannel</span> clojure.core.async.impl.channels.ManyToManyChannel@5636e34&gt;
 5
+</pre>
+</div>
+
+<p>
+It helps you avoid the following callback-hell: (pseudo-code)
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [ch (go 5)]
+  (on-receive ch
+              (<span style="color: #00ffff;">fn</span> [msg]
+                (<span style="color: #00ffff;">let</span> [value msg]
+                  (<span style="color: #b0c4de;">println</span> value)))))
 </pre>
 </div>
 
@@ -281,27 +441,64 @@ See also: &gt;!
 </section>
 </section>
 <section>
-<section id="sec-17" >
+<section id="sec-21" >
 
-<h2>Synchronous</h2>
+<h2>Exercise</h2>
 <p>
-The semantics of CSP are that takes and puts are synchronous.
-If you take, it will block until something puts.
-It you put, it will block until something takes.
+Create a channel, 'put!' two values onto it, and use a 'go' block to print them in a single vector.
 </p>
+</section>
+</section>
+<section>
+<section id="sec-22" >
+
+<h2>Exercise - Answer</h2>
+<p>
+Create a channel, 'put!' two values onto it, and use a 'go' block to print them in a single vector.
+</p>
+
 <div class="org-src-container">
 
-<pre class="src src-clojure">(<span style="color: #00ffff; font-weight: bold;">let</span> [c (chan)]
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [ch (a/chan)]
   (go
-   (<span style="color: #0000ff; font-weight: bold;">println</span> <span style="color: #00ff00;">"We are here"</span>)
-   (&lt;! c)
-   (<span style="color: #0000ff; font-weight: bold;">println</span> <span style="color: #00ff00;">"We won't get here"</span>)))
+   (<span style="color: #00ffff;">let</span> [val-1 (&lt;! ch)
+         val-2 (&lt;! ch)]
+     (<span style="color: #b0c4de;">prn</span> [val-1 val-2])))
+  (put! out 42)
+  (put! out 64))
 </pre>
 </div>
 </section>
 </section>
 <section>
-<section id="sec-18" >
+<section id="sec-23" >
+
+<h2>Synchronous</h2>
+<p>
+The semantics of CSP are that takes and puts are synchronous.
+</p>
+
+<p>
+If you take, it will block until something puts.
+</p>
+
+<p>
+It you put, it will block until something takes.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [c (chan)]
+  (go
+   (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"We are here"</span>)
+   (&lt;! c)
+   (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"We won't get here"</span>)))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-24" >
 
 <h2>Channels</h2>
 <p>
@@ -310,72 +507,24 @@ Channels allow goroutines to talk to each other.
 
 <div class="org-src-container">
 
-<pre class="src src-clojure"><span style="color: #ff0000;">;; </span><span style="color: #ff0000;">Order doesn't matter</span>
-      (<span style="color: #00ffff; font-weight: bold;">let</span> [c (chan)]
-        (go
-         (&gt;! c <span style="color: #00ff00;">"A message"</span>))
-        (go
-         (<span style="color: #0000ff; font-weight: bold;">println</span> <span style="color: #00ff00;">"We are here"</span>)
-         (&lt;! c)
-         (<span style="color: #0000ff; font-weight: bold;">println</span> <span style="color: #00ff00;">"We made progress"</span>)))
+<pre class="src src-clojure"><span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">Order doesn't matter</span>
+user=&gt; (<span style="color: #00ffff;">let</span> [c (chan)]
+         (go
+          (&gt;! c <span style="color: #ffa07a;">"A message"</span>))
+         (go
+          (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"We are here"</span>)
+          (&lt;! c)
+          (<span style="color: #b0c4de;">println</span> <span style="color: #ffa07a;">"We made progress"</span>)))
 
-      <span style="color: #0000ff; font-weight: bold;">We</span> are here
-  #&lt;<span style="color: #0000ff; font-weight: bold;">ManyToManyChannel</span> clojure.core.async.impl.channels.ManyToManyChannel@27d198c3&gt;
-  <span style="color: #0000ff; font-weight: bold;">We</span> made progress
+<span style="color: #b0c4de;">We</span> are here
+#&lt;<span style="color: #b0c4de;">ManyToManyChannel</span> clojure.core.async.impl.channels.ManyToManyChannel@27d198c3&gt;
+<span style="color: #b0c4de;">We</span> made progress
 </pre>
 </div>
 </section>
 </section>
 <section>
-<section id="sec-19" >
-
-<h2>Websockets</h2>
-<p>
-Websockets are long-lived connections between the client and the server through which messages can be sent in both directions.
-</p>
-</section>
-</section>
-<section>
-<section id="sec-20" >
-
-<h2>Creating a channel from a websocket</h2>
-<p>
-Uncomment includes at the top of the handler
-</p>
-
-<div class="org-src-container">
-
-<pre class="src src-clojure">(<span style="color: #00ffff; font-weight: bold;">defn</span> <span style="color: #0000ff; font-weight: bold;">socket-handler</span> [request]
-(with-channel request ws-ch
-  (go-loop []
-    (<span style="color: #00ffff; font-weight: bold;">let</span> [{<span style="color: #ff00ff;">:keys</span> [message]} (&lt;! ws-ch)]
-      (&gt;! ws-ch message)
-      (<span style="color: #00ffff; font-weight: bold;">recur</span>)))))
-</pre>
-</div>
-</section>
-</section>
-<section>
-<section id="sec-21" >
-
-<h2>In your browser's js console&#x2026;</h2>
-<div class="org-src-container">
-
-<pre class="src src-js"><span style="color: #00ffff; font-weight: bold;">var</span> <span style="color: #ffff00;">socket</span> = <span style="color: #00ffff; font-weight: bold;">new</span> <span style="color: #00ff00;">WebSocket</span>(<span style="color: #00ff00;">"ws://localhost:3000/ws"</span>);
-
-socket.onmessage = <span style="color: #00ffff; font-weight: bold;">function</span>(<span style="color: #ffff00;">event</span>) { console.log(event.data); }
-
-socket.send(<span style="color: #00ff00;">"Data to be sent"</span>);
-</pre>
-</div>
-
-<p>
-You should see the data you sent echoed back.
-</p>
-</section>
-</section>
-<section>
-<section id="sec-22" >
+<section id="sec-25" >
 
 <h2>ClojureScript</h2>
 <p>
@@ -384,7 +533,7 @@ You can write client-side javascript in Clojure too!
 </section>
 </section>
 <section>
-<section id="sec-23" >
+<section id="sec-26" >
 
 <h2>Writing Clojurescript</h2>
 <p>
@@ -397,31 +546,31 @@ Create the file
 
 <div class="org-src-container">
 
-<pre class="src src-clojure">(<span style="color: #00ffff; font-weight: bold;">ns</span> sketchy.client)
+<pre class="src src-clojure">(<span style="color: #00ffff;">ns</span> sketchy.client)
 
-(<span style="color: #00ffff; font-weight: bold;">defn</span> <span style="color: #0000ff; font-weight: bold;">greet</span> [name]
-  (<span style="color: #0000ff; font-weight: bold;">str</span> <span style="color: #00ff00;">"Hello "</span> name))
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">greet</span> [name]
+  (<span style="color: #b0c4de;">str</span> <span style="color: #ffa07a;">"Hello "</span> name))
 </pre>
 </div>
 </section>
 </section>
 <section>
-<section id="sec-24" >
+<section id="sec-27" >
 
 <h2>Include this in our page</h2>
 <div class="org-src-container">
 
 <pre class="src src-clojure">(html5
-   [<span style="color: #ff00ff;">:head</span>
-    (include-js <span style="color: #00ff00;">"js/sketchy.js"</span>)]
-   [<span style="color: #ff00ff;">:body</span> ....
+   [<span style="color: #7fffd4;">:head</span>
+    (include-js <span style="color: #ffa07a;">"js/sketchy.js"</span>)]
+   [<span style="color: #7fffd4;">:body</span> ....
    ])
 </pre>
 </div>
 </section>
 </section>
 <section>
-<section id="sec-25" >
+<section id="sec-28" >
 
 <h2>Reload the page</h2>
 <p>
@@ -430,15 +579,15 @@ And in your console, type
 
 <div class="org-src-container">
 
-<pre class="src src-js">chitter.client.greet(<span style="color: #00ff00;">"World"</span>);
+<pre class="src src-js">chitter.client.greet(<span style="color: #ffa07a;">"World"</span>);
 
-=&gt; <span style="color: #00ff00;">"Hello World"</span>
+=&gt; <span style="color: #ffa07a;">"Hello World"</span>
 </pre>
 </div>
 </section>
 </section>
 <section>
-<section id="sec-26" >
+<section id="sec-29" >
 
 <h2>Javascript Interop</h2>
 <p>
@@ -447,9 +596,9 @@ Property access
 
 <div class="org-src-container">
 
-<pre class="src src-clojure"><span style="color: #ff0000;">;; </span><span style="color: #ff0000;">obj.x becomes:</span>
+<pre class="src src-clojure"><span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">obj.x becomes:</span>
 
-(<span style="color: #0000ff; font-weight: bold;">.-x</span> obj)
+(<span style="color: #b0c4de;">.-x</span> obj)
 </pre>
 </div>
 
@@ -459,9 +608,9 @@ Calling functions
 
 <div class="org-src-container">
 
-<pre class="src src-clojure"><span style="color: #ff0000;">;; </span><span style="color: #ff0000;">obj.call(something);</span>
+<pre class="src src-clojure"><span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">obj.call(something);</span>
 
-(<span style="color: #0000ff; font-weight: bold;">.call</span> obj something)
+(<span style="color: #b0c4de;">.call</span> obj something)
 </pre>
 </div>
 
@@ -471,15 +620,15 @@ Access global javascript object
 
 <div class="org-src-container">
 
-<pre class="src src-clojure"><span style="color: #ff0000;">;; </span><span style="color: #ff0000;">console.log("message") becomes:</span>
+<pre class="src src-clojure"><span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">console.log("message") becomes:</span>
 
-(js/console.log <span style="color: #00ff00;">"message"</span>)
+(js/console.log <span style="color: #ffa07a;">"message"</span>)
 </pre>
 </div>
 </section>
 </section>
 <section>
-<section id="sec-27" >
+<section id="sec-30" >
 
 <h2>Exercise</h2>
 <p>
@@ -488,9 +637,9 @@ Create an event handler in ClojureScript that will print out the mouse coordinat
 
 <div class="org-src-container">
 
-<pre class="src src-js"><span style="color: #ff0000;">// </span><span style="color: #ff0000;">In javascript this would be</span>
-window.addEventListener(<span style="color: #00ff00;">"mousemove"</span>,
-  <span style="color: #00ffff; font-weight: bold;">function</span>(<span style="color: #ffff00;">event</span>) { 
+<pre class="src src-js"><span style="color: #ff7f24;">// </span><span style="color: #ff7f24;">In javascript this would be</span>
+window.addEventListener(<span style="color: #ffa07a;">"mousemove"</span>,
+  <span style="color: #00ffff;">function</span>(<span style="color: #eedd82;">event</span>) { 
     console.log(event);
   });
 </pre>
@@ -498,16 +647,16 @@ window.addEventListener(<span style="color: #00ff00;">"mousemove"</span>,
 </section>
 </section>
 <section>
-<section id="sec-28" >
+<section id="sec-31" >
 
-<h2>Load javascript on page load</h2>
+<h2>Load JavaScript on page load</h2>
 <p>
-Add to bottom of page:
+Add to bottom of ClojureScript:
 </p>
 
 <div class="org-src-container">
 
-<pre class="src src-clojure">[<span style="color: #ff00ff;">:script</span> <span style="color: #00ff00;">"sketchy.client.main()"</span>]
+<pre class="src src-clojure">(set! (<span style="color: #b0c4de;">.-onload</span> js/window) main)
 </pre>
 </div>
 
@@ -517,35 +666,35 @@ We're calling a function called 'main' on page load.
 </section>
 </section>
 <section>
-<section id="sec-29" >
+<section id="sec-32" >
 
 <h2>Creating UI channel</h2>
 <div class="org-src-container">
 
-<pre class="src src-clojure">(<span style="color: #00ffff; font-weight: bold;">defn</span> <span style="color: #0000ff; font-weight: bold;">events</span> [el type]
-  (<span style="color: #00ffff; font-weight: bold;">let</span> [out (chan)]
-    (<span style="color: #0000ff; font-weight: bold;">.addEventListener</span> el type
-                       (<span style="color: #00ffff; font-weight: bold;">fn</span> [e] (put! out e)))
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">events</span> [el type]
+  (<span style="color: #00ffff;">let</span> [out (chan)]
+    (d/listen! el type
+               (<span style="color: #00ffff;">fn</span> [e] (put! out e)))
     out))
 </pre>
 </div>
 
 <p>
-We're outside a go block so we can't use &gt;!. We use the asynchronous version.
+We're outside a go block so we can't use &gt;!. We use the asynchronous version put!
 </p>
 </section>
 </section>
 <section>
-<section id="sec-30" >
+<section id="sec-33" >
 
 <h2>Exercise</h2>
 <p>
-Inside your main function, create a go loop that prints out the mouse moved events
+Inside your main function, create a go loop that prints out the mousemoved events
 </p>
 </section>
 </section>
 <section>
-<section id="sec-31" >
+<section id="sec-34" >
 
 <h2>Channels are like sequences</h2>
 <p>
@@ -554,9 +703,9 @@ They have map and reduce too!
 
 <div class="org-src-container">
 
-<pre class="src src-clojure"><span style="color: #ff0000;">;; </span><span style="color: #ff0000;">Takes a function and a source channel, and returns a channel which</span>
-<span style="color: #ff0000;">;; </span><span style="color: #ff0000;">contains the values produced by applying f to each value taken from</span>
-<span style="color: #ff0000;">;; </span><span style="color: #ff0000;">the source channel</span>
+<pre class="src src-clojure"><span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">Takes a function and a source channel, and returns a channel which</span>
+<span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">contains the values produced by applying f to each value taken from</span>
+<span style="color: #ff7f24;">;; </span><span style="color: #ff7f24;">the source channel</span>
 (map&lt; some-fn some-channel)
 </pre>
 </div>
@@ -567,59 +716,116 @@ See also map&gt;, reduce, filter&gt;, filter&lt;, remove&gt;, remove&lt;
 </section>
 </section>
 <section>
-<section id="sec-32" >
+<section id="sec-35" >
 
 <h2>Exercise</h2>
 <p>
-Adapt your main function to print out a vector containing only the pageX and pageY components of the mouse event.
+Adapt your main function to print out a vector containing only the x and y components of the mousemove event.
 </p>
 </section>
 </section>
 <section>
-<section id="sec-33" >
+<section id="sec-36" >
 
 <h2>Drawing into the canvas</h2>
 <div class="org-src-container">
 
-<pre class="src src-clojure">(<span style="color: #00ffff; font-weight: bold;">defn</span> <span style="color: #0000ff; font-weight: bold;">draw-point</span> [context [x y]]
-  (<span style="color: #0000ff; font-weight: bold;">.fillRect</span> context x y 10 10))
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">draw-point</span> [canvas [x y]]
+  (<span style="color: #00ffff;">let</span> [context (<span style="color: #b0c4de;">.getContext</span> canvas <span style="color: #ffa07a;">"2d"</span>)]
+    (<span style="color: #b0c4de;">.fillRect</span> context x y 10 10)))
 </pre>
 </div>
 </section>
 </section>
 <section>
-<section id="sec-34" >
+<section id="sec-37" >
 
 <h2>Skip to the end</h2>
 <p>
 Combing channels with alts!
 </p>
 
+<p>
+loop recur
+</p>
+
+<p>
+condp
+</p>
+
 <pre class="example">
 (defn main []
-  (let [move (map&lt; e-&gt;v (events js/window "mousemove"))
-        down (events js/window "mousedown")
-        up (events js/window "mouseup")
-        canvas (sel1 :#canvas)
-        context (.getContext canvas "2d")]
+  (let [canvas (sel1 :#canvas)
+        move (map&lt; e-&gt;v (events canvas "mousemove"))
+        down (events canvas "mousedown")
+        up (events canvas "mouseup")]
     (go
      (let [ws (&lt;! (ws-ch "ws://localhost:3000/ws"))]
-       (go (while true
-             (draw-point context (read-string (:message (&lt;! ws))))))
+       (go-loop []
+                (draw-point canvas (read-string (:message (&lt;! ws))))
+                (recur))
        (go-loop [draw-point? false]
                 (let [[v sc] (alts! [move down up])]
                   (condp = sc
                     down (recur true)
                     up (recur false)
                     move (do (when draw-point?
-                               (.log js/console (pr-str v))
+                               (js/console.log (pr-str v))
                                (&gt;! ws v))
                              (recur draw-point?)))))))))
 </pre>
 </section>
 </section>
 <section>
-<section id="sec-35" >
+<section id="sec-38" >
+
+<h2>Websockets</h2>
+<p>
+Websockets are long-lived connections between the client and the server through which messages can be sent in both directions.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-39" >
+
+<h2>Creating a channel from a websocket</h2>
+<p>
+Uncomment includes at the top of the handler
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">socket-handler</span> [request]
+(with-channel request ws-ch
+  (go-loop []
+    (<span style="color: #00ffff;">let</span> [{<span style="color: #7fffd4;">:keys</span> [message]} (&lt;! ws-ch)]
+      (&gt;! ws-ch message)
+      (<span style="color: #00ffff;">recur</span>)))))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-40" >
+
+<h2>In your browser's js console&#x2026;</h2>
+<div class="org-src-container">
+
+<pre class="src src-js"><span style="color: #00ffff;">var</span> <span style="color: #eedd82;">socket</span> = <span style="color: #00ffff;">new</span> <span style="color: #98fb98;">WebSocket</span>(<span style="color: #ffa07a;">"ws://localhost:3000/ws"</span>);
+
+socket.onmessage = <span style="color: #00ffff;">function</span>(<span style="color: #eedd82;">event</span>) { console.log(event.data); }
+
+socket.send(<span style="color: #ffa07a;">"Data to be sent"</span>);
+</pre>
+</div>
+
+<p>
+You should see the data you sent echoed back.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-41" >
 
 <h2>Create a collaborative drawing app!</h2>
 <p>
@@ -628,7 +834,7 @@ Adapt the server side keep an atom of clients, return events to all of them.
 </section>
 </section>
 <section>
-<section id="sec-36" >
+<section id="sec-42" >
 
 <h2>What we covered</h2>
 <ul class="org-ul">
@@ -642,12 +848,9 @@ Adapt the server side keep an atom of clients, return events to all of them.
 </section>
 </section>
 <section>
-<section id="sec-37" >
+<section id="sec-43" >
 
 <h2>Thank You</h2>
-<p>
-/
-</p>
 </section>
 </section>
 </div>
@@ -661,7 +864,7 @@ Adapt the server side keep an atom of clients, return events to all of them.
         		Reveal.initialize({
         			controls: true,
         			progress: true,
-        			history: false,
+        			history: true,
         			center: true,
         			rollingLinks: false,
         			keyboard: true,

@@ -4,12 +4,12 @@
 
 #+REVEAL_EXTRA_CSS: css/zenburn.css
 #+REVEAL_THEME: moon
-#+OPTIONS: num:nil toc:nil reveal_mathjax:t history:t
+#+OPTIONS: num:nil toc:nil reveal_mathjax:t reveal_history:t
 #+REVEAL_TRANS: fade
 
 * One I prepared earlier
 
-  git://github.com/likely/sketchy.git
+git://github.com/likely/sketchy.git
 
 * A quick refresher
 
@@ -37,50 +37,99 @@ We could easily spend a day on each one.
 
 We'll give you an understanding of the basics, and hopefully the hunger to find out more.
 
+* In LISPs, (= Code Data)
+
+(inc 0) is simply a list of two elements - the symbol 'inc', and the value '0'.
+
+The REPL evaluates lists by treating the first argument as a function, and the rest as arguments to that function:
+
+#+begin_src clojure
+user=> (inc 0)
+1
+#+end_src
+
+We can ask the REPL not to eval a form by quoting it:
+
+#+BEGIN_SRC clojure
+user=> '(inc 0)
+(inc 0)
+#+END_SRC
+
+This is why you needed to quote 'requires' in the first week - to stop the REPL trying to evaluate it!
+
+#+BEGIN_SRC clojure
+user=> (require '[clj-http.core :reload :all])
+nil
+#+END_SRC
+
+* Exercise
+
+Try this on a 'defn' from last week - what does it return (literally)?
+
+#+BEGIN_SRC clojure
+user=> '(defn your-fn [your-params] (do-something ...))
+???
+#+END_SRC
+
+* Eval is the opposite of quote
+
+#+BEGIN_SRC clojure
+user=> (eval '(inc 0))
+1
+#+END_SRC
+
+This is what the REPL is doing to your code!
+
 * Macros
 
 A macro is just a function that receives its arguments *unevaluated* at compile time.
 
-Because the unevaluated arguments are *code*, macros can operate on the code as if it was data*.
+Because the unevaluated arguments are *code*, macros can operate on the code *as if it were data*.
 
 * Macros we've already used
 
-Compojure's `defroutes` is a macro.
+'when', 'and' and 'or' are macros - because they need to control the execution order of their parameters.
 
-We can use `macroexpand` to inspect it.
+If 'when' were a function, it could be implemented thus:
+
+#+BEGIN_SRC clojure
+  (defn bad-when [test & then]
+    (if test
+      then
+      nil))
+#+END_SRC
+
+But look what happens when the test is false:
+
+#+BEGIN_SRC clojure
+  user=> (bad-when (= 1 0)
+           (println "uh oh!"))
+  uh oh!
+  nil
+#+END_SRC
+
+* 
+
+Because functions' parameters are evaluated before the function is called, we will always evaluate the 'then' block! 
+
+*This will not do!*
+
+So 'when' *must* be a macro.
 
 * Macroexpand
 
-You can use the function macroexpand and macroexpand-all to see the effect of macros.
+You can use the function macroexpand and macroexpand-1 to see the effect of macros (indentation mine):
 
 #+BEGIN_SRC clojure
-(macroexpand-all '(defroutes app-routes
-  (GET "/" [] (index-view (swap! counter inc)))
-  (GET "/ws" [] socket-handler)
-  (route/resources "/")
-  (route/not-found "Not Found")))
-#+END_SRC
-
-* Why are Macros? 
-
-If *functions* receive data and return new data,
-
-Macros receive *code* and return *new code*.
+user=> (macroexpand-1 '(when (= 1 0)
+                             (println "uh oh!")
+                             (println "this isn't good!")))
   
-* Argument evaluation
-  
-#+BEGIN_SRC clojure
-(and (= 1 1) (println "Hello World"))
+(if (= 1 0)
+  (do
+    (println "uh oh!")
+    (println "this isn't good!")))
 #+END_SRC
-
-Is "Hello World" printed?
-
-#+BEGIN_SRC clojure
-(and (= 1 0) (println "Hello World"))
-#+END_SRC
-
-Why?
-
 
 * Exercise
 
@@ -94,23 +143,39 @@ Why?
 
   and, or, when, while, for, cond, ->, ->>
 
-  -> and ->> are the threading macros, they restructure code to make it more legible.
+  -> and ->> are the threading macros - they restructure heavily nested code to make it more legible:
+
+* Threading macros
+
+#+BEGIN_SRC clojure
+  (let [my-map {:b 2
+                :c {:d 3
+                    :e 5}}]
+    (vals (update-in (assoc my-map :b 3) [:c :e] inc)))
+  ;; could be better written as
+  (-> {:b 2
+       :c {:d 3
+           :e 5}}
+      (assoc :b 3)
+      (update-in [:c :e] inc)
+      vals)
+#+END_SRC
+
+#+BEGIN_SRC clojure
+  (let [forecast-days (forecast "london,uk" {:cnt 10})]
+    (count (remove cloudy? forecast-days)))
+  ;; could be written as:
+  (->> (forecast "london,uk" {:cnt 10})
+       (remove cloudy?)
+       count)
+#+END_SRC
  
-* Exercise
-
-  Re-write the view using threading
-
-  #+BEGIN_SRC clojure
-  (index-view (swap! counter inc))
-  #+END_SRC
-
 * Exercise
 
 #+begin_src clojure
 
 ;; Re-write the below using -> threading macro
 (/ (* (+ 10 2) 5) (* 2 5))
-
   
 ;; Re-write the below using ->> threading macro
 (* 10 (apply + (map inc (range 10))))
@@ -122,32 +187,96 @@ An implementation of Communicating Sequential Processes (CSP).
 
 CSP is an old idea, but basis of concurrency in languages such as Google's Go.
 
-The processes are more lightweight than threads, suitable for parallel web apps.
+The processes are more lightweight than threads, suitable for highly parallel web apps.
 
-* Core Async
+* core.async
+
+*Channels* are the fundamental building blocks of core.async:
+
+#+BEGIN_SRC clojure
+  user=> (require '[clojure.core.async :as a])
+  nil
   
-  Inside a go block you can do what appear to be async synchronously.
+  user=> (a/chan)
+  #<ManyToManyChannel clojure.core.async.impl.channels.ManyToManyChannel@30804b08>
+#+END_SRC
+
+Normally, all operations on channels are blocking, but (so that we can
+test the examples on the upcoming slides) we can asynchronously put a
+value on a channel with 'put!':
+
+#+BEGIN_SRC clojure
+  (let [out (a/chan)]
+    (put! out 5)
+    out)
+#+END_SRC
+
+* Go!
+
+Operations in core.async are usually found within 'go' blocks.
+
+A 'go' block transparently translates your beautiful synchronous code
+into the asynchronous callback-hell-style code you would have had to
+write otherwise.
+
+'Go' blocks return a channel eventually containing a single value - the result of the 'go' block:
+
+#+BEGIN_SRC clojure
+user=> (go 5)
+#<ManyToManyChannel clojure.core.async.impl.channels.ManyToManyChannel@30804b08>
+#+END_SRC
+
+* Taking from a channel
   
-  #+BEGIN_SRC clojure
-  (go 5)
-=> #<ManyToManyChannel clojure.core.async.impl.channels.ManyToManyChannel@30804b08>
-  #+END_SRC
-  
-  Take accepts a channel and returns a value from it. It needs to be inside a go block.
+  On the surface, <! ('take') appears to accept a channel and synchronously return a value from it. 
+
+  <! must be used inside a go block.
 
   #+BEGIN_SRC clojure
-  user> (go (println (<! (go 5))))
-#<ManyToManyChannel clojure.core.async.impl.channels.ManyToManyChannel@5636e34>
-5
+    user> (go
+           (let [value (<! (go 5))]
+             (println value)))
+    #<ManyToManyChannel clojure.core.async.impl.channels.ManyToManyChannel@5636e34>
+    5
   #+END_SRC
+
+It helps you avoid the following callback-hell: (pseudo-code)
+#+BEGIN_SRC clojure
+  (let [ch (go 5)]
+    (on-receive ch
+                (fn [msg]
+                  (let [value msg]
+                    (println value)))))
+#+END_SRC
 
   See also: >!
+
+* Exercise
+
+Create a channel, 'put!' two values onto it, and use a 'go' block to print them in a single vector.
+
+* Exercise - Answer
+
+Create a channel, 'put!' two values onto it, and use a 'go' block to print them in a single vector.
+
+#+BEGIN_SRC clojure
+  (let [ch (a/chan)]
+    (go
+     (let [val-1 (<! ch)
+           val-2 (<! ch)]
+       (prn [val-1 val-2])))
+    (put! out 42)
+    (put! out 64))
+#+END_SRC
 
 * Synchronous
   
   The semantics of CSP are that takes and puts are synchronous.
+
   If you take, it will block until something puts.
+
   It you put, it will block until something takes.
+
   #+BEGIN_SRC clojure
     (let [c (chan)]
       (go
@@ -161,48 +290,19 @@ The processes are more lightweight than threads, suitable for parallel web apps.
   Channels allow goroutines to talk to each other.
   
   #+BEGIN_SRC clojure
-  ;; Order doesn't matter
-        (let [c (chan)]
-          (go
-           (>! c "A message"))
-          (go
-           (println "We are here")
-           (<! c)
-           (println "We made progress")))
-    
-        We are here
+    ;; Order doesn't matter
+    user=> (let [c (chan)]
+             (go
+              (>! c "A message"))
+             (go
+              (println "We are here")
+              (<! c)
+              (println "We made progress")))
+        
+    We are here
     #<ManyToManyChannel clojure.core.async.impl.channels.ManyToManyChannel@27d198c3>
     We made progress  
   #+END_SRC
-
-* Websockets
-  
-  Websockets are long-lived connections between the client and the server through which messages can be sent in both directions.
-
-* Creating a channel from a websocket
-
-  Uncomment includes at the top of the handler
-
-  #+BEGIN_SRC clojure
-  (defn socket-handler [request]
-  (with-channel request ws-ch
-    (go-loop []
-      (let [{:keys [message]} (<! ws-ch)]
-        (>! ws-ch message)
-        (recur)))))
-  #+END_SRC
-
-* In your browser's js console...
-
-#+begin_src js
-var socket = new WebSocket("ws://localhost:3000/ws");
-
-socket.onmessage = function(event) { console.log(event.data); }
-
-socket.send("Data to be sent");
-#+end_src
-
-You should see the data you sent echoed back.
 
 * ClojureScript
 
@@ -279,7 +379,7 @@ window.addEventListener("mousemove",
   });
 #+END_SRC
 
-* Load javascript on page load
+* Load JavaScript on page load
 
 Add to bottom of ClojureScript:
 
@@ -361,6 +461,35 @@ condp
                                (>! ws v))
                              (recur draw-point?)))))))))
 #+END_SRC
+
+* Websockets
+  
+  Websockets are long-lived connections between the client and the server through which messages can be sent in both directions.
+
+* Creating a channel from a websocket
+
+  Uncomment includes at the top of the handler
+
+  #+BEGIN_SRC clojure
+  (defn socket-handler [request]
+  (with-channel request ws-ch
+    (go-loop []
+      (let [{:keys [message]} (<! ws-ch)]
+        (>! ws-ch message)
+        (recur)))))
+  #+END_SRC
+
+* In your browser's js console...
+
+#+begin_src js
+var socket = new WebSocket("ws://localhost:3000/ws");
+
+socket.onmessage = function(event) { console.log(event.data); }
+
+socket.send("Data to be sent");
+#+end_src
+
+You should see the data you sent echoed back.
 
 * Create a collaborative drawing app!
 
