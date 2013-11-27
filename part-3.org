@@ -376,7 +376,7 @@ Open the file
 And in your JavaScript console, type
 
 #+begin_src js
-chitter.client.greet("World");
+sketchy.client.greet("World");
 
 => "Hello World"
 #+end_src
