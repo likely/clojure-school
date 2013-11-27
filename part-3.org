@@ -202,7 +202,7 @@ The processes are more lightweight than threads, suitable for highly parallel we
 *Channels* are the fundamental building blocks of core.async:
 
 #+BEGIN_SRC clojure
-  user=> (require '[clojure.core.async :as a])
+  user=> (require '[clojure.core.async :refer [go go-loop >! <! put! chan])
   nil
   
   user=> (chan)
