@@ -1,11 +1,11 @@
 # Clojure School
 
-[Likely](http://likely.co) are hosting Clojure School for four weeks from 12th November, aiming to teach the fundamentals of the [Clojure](http://clojure.org/) programming language.
+[Likely](http://likely.co) are hosting Clojure School for four weeks from 12th November. Targeted at professional software developers, it aims to teach the fundamentals of the [Clojure](http://clojure.org/) programming language in a practical way.
 
 ## Syllabus
 
 * [Part 1](https://github.com/likely/clojure-school/blob/master/part-1.org)
-  * Setting up with Leiningen
+  * Setting up with Leiningen & the REPL
   * Data types
   * Collection types
   * Functions
@@ -14,7 +14,7 @@
 * [Part 2](https://github.com/likely/clojure-school/blob/master/part-2.org)
   * Web development with Clojure
   * Ring, Compojure, Hiccup
-  * Mutable state
+  * Mutable state and STM
   * Atoms, Agents, Refs
   * Multithreading with Future
 * [Part 3](https://github.com/likely/clojure-school/blob/master/part-3.org)
