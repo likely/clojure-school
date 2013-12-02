@@ -1,0 +1,186 @@
+#+Title: Clojure School
+#+Author: Likely
+#+Email: 
+
+#+REVEAL_EXTRA_CSS: css/zenburn.css
+#+REVEAL_THEME: moon
+#+OPTIONS: num:nil toc:nil reveal_mathjax:t reveal_history:t
+#+REVEAL_TRANS: fade
+
+* Homework
+
+* OOP goodies
+  Polymorphism
+
+  In computer science, polymorphism is a programming language feature that allows values of different data types to be handled using a uniform interface.
+
+* The Expression Problem
+
+The Expression Problem refers to the problem of making a language extensible. Software manipulates data types using operations. Sometimes, we want to add new operations, and have them work on existing data types. Sometimes, we want to add new data types, which will work with existing operations.
+
+* The Expression Problem
+
+  [[./images/expression-problem.png]]
+
+  * Clojure 1.2 Protocols by Think Relevance on Vimeo http://vimeo.com/11236603
+
+* A generalisation - OOP
+
+  Object Oriented languages make it relatively easy to add new types
+
+|            | List.add | List.get | List.clear | List.size |
+| ArrayList  |          |          |            |           |
+| LinkedList |          |          |            |           |
+| Stack      |          |          |            |           |
+| Vector     |          |          |            |           |
+| New Class  | ✓        | ✓        | ✓          | ✓         |
+
+* A generalisation - FP
+
+  Functional languages make it relatively easy to add new behaviours
+
+|        | conj | nth | empty | count | New function |
+| list   |      |     |       |       | ✓            |
+| vector |      |     |       |       | ✓            |
+| map    |      |     |       |       | ✓            |
+| set    |      |     |       |       | ✓            |
+
+* Expressivity
+
+  Being able to add new behaviours to existing types and new types to existing behaviours
+  
+* Clojure's solutions
+  
+  - Protocols
+  - Multimethods
+  - Other solutions we won't cover
+
+* Protocols
+
+It is common for polymorphic functions to dispatch (pick implementation) on the type of the first argument. For example, in Java or Ruby, when calling #toString or #to_s on an object, the exact implementation is located using that object's type.
+
+This is a common case and the JVM can optimise this dispatch logic very well.
+
+Protocols are simply groups of functions. Each of the functions can have different implementations for different data types.
+
+* Eample
+
+  #+BEGIN_SRC clojure
+(defprotocol DoesAThing
+  (do-a-thing [in] "Do a thing"))
+
+(extend-protocol DoesAThing
+  clojure.lang.PersistentVector
+    (do-a-thing [in] "A vector (via protocol)")
+  clojure.lang.PersistentArrayMap
+    (do-a-thing [in] "A map (via protocol)"))
+  #+END_SRC
+
+* Exercise
+  
+  Define a protocol called IsBlank that defines a single function blank?
+
+  Implement this function for all strings. Hint: string's class is java.lang.String
+
+* Takeaways
+
+  Notice how we did not need to own or edit Clojure's string implementation to add a protocol to it.
+
+* Reify
+
+  What if we want a type for a particular use-case, but don't need to give it a name?
+
+  Much like anonymous functions, reify allows you to define a type and use it in-place.
+
+* What protocols are not
+
+  - interfacing
+  - monkeypatching (code injection)
+  - wrappers
+  - mixins (multiple-inheritance)
+
+* Sending data over websockets
+
+
+* Exercise
+
+* Multimethods
+
+  A multimethod has a name and a dispatch function.
+
+  The dispatch function takes the arguments passed to the multimethod and returns a value.
+
+  The returned value will define the implementation of the multimethod that gets used.
+
+* Ad-hoc Polymorphism
+
+  In OOP, method implementation is typically picked by traversing the class hierarchy.
+
+  With multimethods, the logic can be anything you need.
+
+* Example
+
+  #+BEGIN_SRC clojure
+(defmulti blank? class)
+  #+END_SRC
+
+  #+BEGIN_SRC clojure
+  (blank? "Hello World")
+=> IllegalArgumentException No method in multimethod 'blank?' for dispatch value: class java.lang.String  clojure.lang.MultiFn.getFn (MultiFn.java:160)
+  #+END_SRC
+
+  #+BEGIN_SRC clojure
+    (defmethod blank? String [s]
+      (every? #(Character/isWhitespace %) s))
+
+(blank? "Hello World")
+=> false
+  #+END_SRC
+
+* Exercise
+  
+* Handling commands with multimethods
+
+  Dispatch based on the first argument, the command type
+
+* Other polymorphic techniques
+
+These are intended for cases where you need to interface with Java code
+
+  - proxy
+  - gen-class
+
+* Making it multiplayer
+
+* Laziness
+
+* The finished game
+
+* What didn't we cover?
+  - Java Interop
+  - Resources
+  - Scoping
+  - Deployment
+  - Heroku
+
+* Cool Libraries
+  - Cascalog
+  - Overtone
+  - core.typed
+  - Schema
+
+* Futher learning
+  - http://clojure-doc.org/
+  - http://www.clojure-toolbox.com/
+  - http://www.braveclojure.com/
+  - http://clojure.org/cheatsheet
+  - Google Groups
+    - clojure
+    - london-clojurians
+    - ClojureScript
+  - Talks at Skills Matter on first Tuesday of the month
+
+* Clojure Dojos
+
+  See the London Clojurians mailing list or follow @ldnclj on Twitter
+  Normally the second Monday or the last Tuesday of the month
