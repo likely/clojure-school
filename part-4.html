@@ -44,21 +44,6 @@
 <section>
 <section id="sec-3" >
 
-<h2>OOP goodies</h2>
-<p>
-Polymorphism
-</p>
-
-<p>
-In computer science, polymorphism is a programming language feature
-that allows values of different data types to be handled using a
-uniform interface.
-</p>
-</section>
-</section>
-<section>
-<section id="sec-4" >
-
 <h2>The Expression Problem</h2>
 <p>
 The Expression Problem refers to the problem of making a language
@@ -81,7 +66,7 @@ existing operations.
 </section>
 </section>
 <section>
-<section id="sec-5" >
+<section id="sec-4" >
 
 <h2>A generalisation - OOP</h2>
 <p>
@@ -156,7 +141,7 @@ Object Oriented languages make it relatively easy to add new types
 </section>
 </section>
 <section>
-<section id="sec-6" >
+<section id="sec-5" >
 
 <h2>A generalisation - FP</h2>
 <p>
@@ -229,7 +214,7 @@ Functional languages make it relatively easy to add new behaviours
 </section>
 </section>
 <section>
-<section id="sec-7" >
+<section id="sec-6" >
 
 <h2>Expressivity</h2>
 <p>
@@ -238,7 +223,7 @@ Being able to add new behaviours to existing types and new types to existing beh
 </section>
 </section>
 <section>
-<section id="sec-8" >
+<section id="sec-7" >
 
 <h2>Polymorphism in Clojure</h2>
 <p>
@@ -252,7 +237,7 @@ Clojure achieves polymorphism through <b>Protocols</b> and <b>Multimethods</b>
 </section>
 </section>
 <section>
-<section id="sec-9" >
+<section id="sec-8" >
 
 <h2>Protocols</h2>
 <p>
@@ -282,7 +267,7 @@ of their drawbacks:
 </section>
 </section>
 <section>
-<section id="sec-10" >
+<section id="sec-9" >
 
 <h2>'Implementing' protocols</h2>
 <p>
@@ -306,7 +291,7 @@ metadata (used for the dynamic dispatch)
 </section>
 </section>
 <section>
-<section id="sec-11" >
+<section id="sec-10" >
 
 <h2>Extending to existing types</h2>
 <p>
@@ -327,7 +312,7 @@ We can also extend existing types (and nil) with <code>extend-protocol</code>:
 </section>
 </section>
 <section>
-<section id="sec-12" >
+<section id="sec-11" >
 
 <h2>Or create anonymous types</h2>
 <p>
@@ -344,7 +329,7 @@ We create anonymous types with <code>reify</code>:
 </section>
 </section>
 <section>
-<section id="sec-13" >
+<section id="sec-12" >
 
 <h2>Multimethods</h2>
 <p>
@@ -370,7 +355,7 @@ We can dispatch on type, by making the dispatch function '<code>type</code>'.
 </section>
 </section>
 <section>
-<section id="sec-14" >
+<section id="sec-13" >
 
 <h2>Multimethods</h2>
 <p>
@@ -390,7 +375,7 @@ original <code>defmulti</code> definition.
 
 </section>
 <section>
-<section id="sec-15" >
+<section id="sec-14" >
 
 <h2>Multiplayer Snake</h2>
 <p>
@@ -403,14 +388,14 @@ You'll need to clone
 </section>
 </section>
 <section>
-<section id="sec-16" >
+<section id="sec-15" >
 
 <h2>Of Widgets and Models</h2>
 <img src="images/widgets-models.svg" />
 </section>
 </section>
 <section>
-<section id="sec-17" >
+<section id="sec-16" >
 
 <h2>Your first challenge:</h2>
 <p>
@@ -432,7 +417,7 @@ It'll need:
 </section>
 </section>
 <section>
-<section id="sec-18" >
+<section id="sec-17" >
 
 <h2>Laziness</h2>
 <p>
@@ -462,7 +447,7 @@ Or we can use <code>doseq</code> (an eager equivalent of <code>for</code>):
 </section>
 </section>
 <section>
-<section id="sec-19" >
+<section id="sec-18" >
 
 <h2>Testing your 'component'</h2>
 <p>
@@ -482,7 +467,7 @@ You can test your component by injecting 'test code' into the
 </section>
 </section>
 <section>
-<section id="sec-20" >
+<section id="sec-19" >
 
 <h2>Your second challenge: wiring up the game state</h2>
 <p>
@@ -510,7 +495,7 @@ Again, test by injecting code into <code>make-board-widget</code>:
 </section>
 </section>
 <section>
-<section id="sec-21" >
+<section id="sec-20" >
 
 <h2>Your third challenge: sending the commands to the model</h2>
 <p>
@@ -534,7 +519,7 @@ Implement the <code>bind-commands!</code> function
 </section>
 </section>
 <section>
-<section id="sec-22" >
+<section id="sec-21" >
 
 <h2>Server-client communication with WebSockets</h2>
 <p>
@@ -556,7 +541,7 @@ Full documentation at:
 </section>
 </section>
 <section>
-<section id="sec-23" >
+<section id="sec-22" >
 
 <h2>Client-side Chord:</h2>
 <div class="org-src-container">
@@ -586,7 +571,7 @@ Messages that come from the server are received as a map with a <code>:message</
 </section>
 </section>
 <section>
-<section id="sec-24" >
+<section id="sec-23" >
 
 <h2>Your fourth challenge: rendering the state from the server</h2>
 <p>
@@ -606,7 +591,7 @@ right-&gt;left
 </section>
 </section>
 <section>
-<section id="sec-25" >
+<section id="sec-24" >
 
 <h2>Your final challenge: send your commands to the server</h2>
 <ul class="org-ul">
@@ -622,7 +607,7 @@ right-&gt;left
 </section>
 </section>
 <section>
-<section id="sec-26" >
+<section id="sec-25" >
 
 <h2>The finished game!</h2>
 <p>
@@ -636,7 +621,7 @@ IP+port with a neighbour) to play multiplayer snake!
 </section>
 </section>
 <section>
-<section id="sec-27" >
+<section id="sec-26" >
 
 <h2>What didn't we cover?</h2>
 <p>
@@ -668,7 +653,7 @@ either in the pub, or on the mailing list!
 </section>
 </section>
 <section>
-<section id="sec-28" >
+<section id="sec-27" >
 
 <h2>Cool Libraries</h2>
 <ul class="org-ul">
@@ -690,7 +675,7 @@ either in the pub, or on the mailing list!
 </section>
 </section>
 <section>
-<section id="sec-29" >
+<section id="sec-28" >
 
 <h2>Further learning</h2>
 <ul class="org-ul">
@@ -718,13 +703,22 @@ either in the pub, or on the mailing list!
 </section>
 </section>
 <section>
-<section id="sec-30" >
+<section id="sec-29" >
 
 <h2>Clojure Dojos</h2>
 <p>
-See the London Clojurians mailing list or follow @ldnclj on Twitter
-Normally the second Monday or the last Tuesday of the month
+See the London Clojurians mailing list or follow @ldnclj on Twitter.
 </p>
+
+<p>
+They're normally the second Monday or the last Tuesday of the month.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-30" >
+
+<h2>Thank You!</h2>
 </section>
 </section>
 </div>
