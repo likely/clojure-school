@@ -15,13 +15,6 @@
 - Implementing a multiplayer snake game
 - Pub
 
-* OOP goodies
-  Polymorphism
-
-  In computer science, polymorphism is a programming language feature
-  that allows values of different data types to be handled using a
-  uniform interface.
-
 * The Expression Problem
 
 The Expression Problem refers to the problem of making a language
@@ -324,6 +317,8 @@ either in the pub, or on the mailing list!
 
 * Clojure Dojos
 
-  See the London Clojurians mailing list or follow @ldnclj on Twitter
-  Normally the second Monday or the last Tuesday of the month
+  See the London Clojurians mailing list or follow @ldnclj on Twitter.
+  
+  They're normally the second Monday or the last Tuesday of the month.
 
+* Thank You!
