@@ -67,14 +67,20 @@ Protocols are simply groups of functions. Each of the functions can have differe
 
   #+BEGIN_SRC clojure
 (defprotocol DoesAThing
-  (do-a-thing [in] "Do a thing"))
+  (do-a-thing [this] "Do a thing"))
 
 (extend-protocol DoesAThing
   clojure.lang.PersistentVector
-    (do-a-thing [in] "A vector (via protocol)")
+    (do-a-thing [this] "A vector (via protocol)")
   clojure.lang.PersistentArrayMap
-    (do-a-thing [in] "A map (via protocol)"))
+    (do-a-thing [this] "A map (via protocol)"))
   #+END_SRC
+
+* This
+
+In object oriented languages, objects have an implicit 'this' that methods can refer to, scoped to the instance.
+
+Protocols are just groups of functions, not methods on an object, so the context is passed to them as a parameter as the first argument.
 
 * Exercise
   
@@ -98,6 +104,11 @@ Protocols are simply groups of functions. Each of the functions can have differe
   - monkeypatching (code injection)
   - wrappers
   - mixins (multiple-inheritance)
+
+
+* ClojureScript detour - Externs
+
+We're including jQuery as an external library.
 
 * Sending data over websockets
 
