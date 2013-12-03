@@ -1,0 +1,772 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>(Clojure School)</title>
+<meta name="author" content="(Likely)"/>
+<link rel="stylesheet" href="./reveal.js/css/reveal.min.css"/>
+<link rel="stylesheet" href="./reveal.js/css/theme/moon.css" id="theme"/>
+<link rel="stylesheet" href="css/main.css"/>
+<link rel="stylesheet" href="./reveal.js/css/print/pdf.css" type="text/css" media="print"/>
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section>
+<h1>Clojure School</h1>
+<h2>Likely</h2>
+<h2><a href="mailto:"></a></h2>
+<h2></h2></section>
+
+<section>
+<section id="sec-1" >
+
+<h2>Homework</h2>
+</section>
+
+</section>
+<section>
+<section id="sec-2" >
+
+<h2>What's up tonight?</h2>
+<ul class="org-ul">
+<li>Pizza/beer
+</li>
+<li>Implementing a multiplayer snake game
+</li>
+<li>Pub
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-3" >
+
+<h2>OOP goodies</h2>
+<p>
+Polymorphism
+</p>
+
+<p>
+In computer science, polymorphism is a programming language feature
+that allows values of different data types to be handled using a
+uniform interface.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-4" >
+
+<h2>The Expression Problem</h2>
+<p>
+The Expression Problem refers to the problem of making a language
+extensible. 
+</p>
+
+<p>
+Software manipulates data types using operations.
+</p>
+
+<p>
+Sometimes, we want to add new operations, and have them work on
+existing data types. 
+</p>
+
+<p>
+Sometimes, we want to add new data types, which will work with
+existing operations.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-5" >
+
+<h2>A generalisation - OOP</h2>
+<p>
+Object Oriented languages make it relatively easy to add new types
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="left">&#xa0;</th>
+<th scope="col" class="left">List.add</th>
+<th scope="col" class="left">List.get</th>
+<th scope="col" class="left">List.clear</th>
+<th scope="col" class="left">List.size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="left">ArrayList</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">LinkedList</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">Stack</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">Vector</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="left">New Class</td>
+<td class="left">✓</td>
+<td class="left">✓</td>
+<td class="left">✓</td>
+<td class="left">✓</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section>
+<section id="sec-6" >
+
+<h2>A generalisation - FP</h2>
+<p>
+Functional languages make it relatively easy to add new behaviours
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="left">&#xa0;</td>
+<td class="left">conj</td>
+<td class="left">nth</td>
+<td class="left">empty</td>
+<td class="left">count</td>
+<td class="left">New function</td>
+</tr>
+
+<tr>
+<td class="left">list</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">✓</td>
+</tr>
+
+<tr>
+<td class="left">vector</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">✓</td>
+</tr>
+
+<tr>
+<td class="left">map</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">✓</td>
+</tr>
+
+<tr>
+<td class="left">set</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">&#xa0;</td>
+<td class="left">✓</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section>
+<section id="sec-7" >
+
+<h2>Expressivity</h2>
+<p>
+Being able to add new behaviours to existing types and new types to existing behaviours
+</p>
+</section>
+</section>
+<section>
+<section id="sec-8" >
+
+<h2>Polymorphism in Clojure</h2>
+<p>
+Polymorphism in functional languages is achieved differently to
+polymorphism in OOP languages.
+</p>
+
+<p>
+Clojure achieves polymorphism through <b>Protocols</b> and <b>Multimethods</b>
+</p>
+</section>
+</section>
+<section>
+<section id="sec-9" >
+
+<h2>Protocols</h2>
+<p>
+Protocols define of a set of functions that implementers should
+implement defined using <code>defprotocol</code>:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defprotocol</span> <span style="color: #87cefa;">PossiblyBlank</span>
+  (blank? [_])
+  (value [_]))
+</pre>
+</div>
+
+<p>
+Protocols are similar in nature to Java's interfaces, but without some
+of their drawbacks:
+</p>
+
+<ul class="org-ul">
+<li>Protocols can be retroactively added to classes (and nil!)
+</li>
+<li>Protocols are completely independent of each other (no inheritance hierarchy)
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-10" >
+
+<h2>'Implementing' protocols</h2>
+<p>
+Protocols can be implemented by 'records' - a Clojure map with 'type'
+metadata (used for the dynamic dispatch)
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defrecord</span> <span style="color: #87cefa;">MyRecord</span> [a-key b-key]
+  <span style="color: #b0c4de;">PossiblyBlank</span>
+  (blank? [_] (<span style="color: #b0c4de;">not</span> (<span style="color: #00ffff;">or</span> a-key b-key))
+  (value [this] this)))
+
+(<span style="color: #00ffff;">def</span> <span style="color: #87cefa;">record</span> (<span style="color: #b0c4de;">MyRecord.</span> <span style="color: #7fffd4;">:a</span> <span style="color: #7fffd4;">:b</span>))
+(<span style="color: #00ffff;">def</span> <span style="color: #87cefa;">record-2</span>
+  (map-&gt;<span style="color: #b0c4de;">MyRecord</span> {<span style="color: #7fffd4;">:a-key</span> <span style="color: #7fffd4;">:a</span>
+                  <span style="color: #7fffd4;">:b-key</span> <span style="color: #7fffd4;">:b</span>}))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-11" >
+
+<h2>Extending to existing types</h2>
+<p>
+We can also extend existing types (and nil) with <code>extend-protocol</code>:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #b0c4de;">extend-protocol</span> <span style="color: #b0c4de;">PossiblyBlank</span>
+  <span style="color: #b0c4de;">String</span>
+  (blank? [s] (<span style="color: #b0c4de;">not</span> (<span style="color: #b0c4de;">zero?</span> (<span style="color: #b0c4de;">count</span> s))))
+  (value [s] s)
+
+  nil
+  (blank? [_] true)
+  (value [_] nil))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-12" >
+
+<h2>Or create anonymous types</h2>
+<p>
+We create anonymous types with <code>reify</code>:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [my-value (<span style="color: #b0c4de;">+</span> 4 5)]
+  (<span style="color: #b0c4de;">reify</span> <span style="color: #b0c4de;">PossiblyBlank</span>
+    (blank? [_] false)
+    (value [_] my-value)))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-13" >
+
+<h2>Multimethods</h2>
+<p>
+We don't have to dispatch on type - we can dispatch on an arbitrary
+function:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defmulti</span> <span style="color: #87cefa;">apply-command</span> (<span style="color: #00ffff;">fn</span> [position command] command))
+
+(<span style="color: #00ffff;">defmethod</span> <span style="color: #87cefa;">apply-command</span> <span style="color: #7fffd4;">:move-up</span> [position _]
+  (<span style="color: #b0c4de;">update-in</span> position [<span style="color: #7fffd4;">:y</span>] dec))
+
+(<span style="color: #00ffff;">defmethod</span> <span style="color: #87cefa;">apply-command</span> <span style="color: #7fffd4;">:move-right</span> [position _]
+  (<span style="color: #b0c4de;">update-in</span> position [<span style="color: #7fffd4;">:x</span>] inc))
+</pre>
+</div>
+
+<p>
+We can dispatch on type, by making the dispatch function '<code>type</code>'.
+</p>
+</section>
+</section>
+<section>
+<section id="sec-14" >
+
+<h2>Multimethods</h2>
+<p>
+The implementations of a multimethod do not have to reside with the
+original <code>defmulti</code> definition.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defmethod</span> <span style="color: #87cefa;">print-method</span> <span style="color: #b0c4de;">PossiblyBlank</span> [this w] 
+  (<span style="color: #b0c4de;">.write</span> w (<span style="color: #00ffff;">if</span> (blank? this)
+              (<span style="color: #b0c4de;">pr-str</span> (value this))
+              <span style="color: #ffa07a;">"blank"</span>)))
+</pre>
+</div>
+</section>
+
+</section>
+<section>
+<section id="sec-15" >
+
+<h2>Multiplayer Snake</h2>
+<p>
+You'll need to clone
+</p>
+
+<p>
+<a href="https://github.com/likely/snake.git">https://github.com/likely/snake.git</a>
+</p>
+</section>
+</section>
+<section>
+<section id="sec-16" >
+
+<h2>Of Widgets and Models</h2>
+<img src="images/widgets-models.svg" />
+</section>
+</section>
+<section>
+<section id="sec-17" >
+
+<h2>Your first challenge:</h2>
+<p>
+Define and implement the GameBoardComponent protocol in <code>/src/cljs/snake/cljs/board_widget.cljs</code>
+</p>
+
+<p>
+It'll need:
+</p>
+
+<ul class="org-ul">
+<li>a way to render a 'snake' (given a list of cells)
+</li>
+<li>a way to render an 'apple' (given x-y co-ords)
+</li>
+<li>a way to clear the canvas for the next frame (hint - 'clearRect')
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-18" >
+
+<h2>Laziness</h2>
+<p>
+Recap: map is <b>lazy</b> - unless you evaluate the results it won't do any work!
+</p>
+
+<p>
+We force this by using <code>dorun</code> (if we don't care about the return value) or <code>doall</code> (if we do):
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">dorun</span> (<span style="color: #b0c4de;">map</span> render-cell! cells))
+</pre>
+</div>
+
+<p>
+Or we can use <code>doseq</code> (an eager equivalent of <code>for</code>):
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">doseq</span> [cell cells]
+  (render-cell! cell))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-19" >
+
+<h2>Testing your 'component'</h2>
+<p>
+You can test your component by injecting 'test code' into the
+<code>make-board-widget</code> function:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">let</span> [board ...]
+
+  (render-snake! board [[7 4] [7 5] [7 6]])
+
+  (board-&gt;node board))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-20" >
+
+<h2>Your second challenge: wiring up the game state</h2>
+<p>
+Implement the <code>watch-game!</code> function.
+</p>
+
+<p>
+Every time the <code>!game</code> atom changes, we'll need to clear the board, and
+draw the new state.
+</p>
+
+<p>
+An example <code>!game</code> state is in <code>/src/cljs/snake/cljs/multiplayer_model.cljs</code>
+</p>
+
+<p>
+Again, test by injecting code into <code>make-board-widget</code>:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #b0c4de;">reset!</span> !game ...test-game-state...)
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-21" >
+
+<h2>Your third challenge: sending the commands to the model</h2>
+<p>
+Implement the <code>bind-commands!</code> function
+</p>
+
+<ul class="org-ul">
+<li>Add a function to the protocol which returns a channel of events
+</li>
+<li>Implement it!
+</li>
+<li>In <code>bind-commands!</code>, you can then pipe these events straight to the model channel with core.async's <code>pipe</code>:
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(a/pipe src-ch dest-ch)
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-22" >
+
+<h2>Server-client communication with WebSockets</h2>
+<p>
+WebSockets are persistent channels through which data can be sent
+in both directions between the browser and the server.
+</p>
+
+<p>
+<b>Chord</b> is a library that turns WebSockets into core.async channels
+</p>
+
+<p>
+Full documentation at:
+</p>
+
+<p>
+<a href="https://github.com/james-henderson/chord.git">https://github.com/james-henderson/chord.git</a>
+</p>
+</section>
+</section>
+<section>
+<section id="sec-23" >
+
+<h2>Client-side Chord:</h2>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #7fffd4;">:require</span> [chord.client <span style="color: #7fffd4;">:refer</span> [ws-ch]]
+          [cljs.core.async <span style="color: #7fffd4;">:refer</span> [&lt;! &gt;! put! close!]])
+(<span style="color: #7fffd4;">:require-macros</span> [cljs.core.async.macros <span style="color: #7fffd4;">:refer</span> [go]])
+
+(go
+  (<span style="color: #00ffff;">let</span> [server-conn (&lt;! (ws-ch <span style="color: #ffa07a;">"ws://localhost:3000/ws"</span>))]
+    (&gt;! server-conn <span style="color: #ffa07a;">"Hello server from client!"</span>)))
+</pre>
+</div>
+
+<p>
+Messages that come from the server are received as a map with a <code>:message</code> key:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(go
+  (<span style="color: #00ffff;">let</span> [server-conn (&lt;! (ws-ch <span style="color: #ffa07a;">"ws://localhost:3000/ws"</span>))]
+    (js/console.log <span style="color: #ffa07a;">"Got message from server:"</span>
+                    (<span style="color: #7fffd4;">:message</span> (&lt;! server-conn)))))
+</pre>
+</div>
+</section>
+</section>
+<section>
+<section id="sec-24" >
+
+<h2>Your fourth challenge: rendering the state from the server</h2>
+<p>
+In <code>/src/cljs/snake/cljs/multiplayer_model.cljs</code>:
+</p>
+
+<ul class="org-ul">
+<li>Implement <code>watch-state!</code>.
+</li>
+<li>You might want to start by <code>js/console.log</code>'ging everything you get
+back from the server!
+</li>
+<li>When it all works, you should see a small snake going from
+right-&gt;left
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-25" >
+
+<h2>Your final challenge: send your commands to the server</h2>
+<ul class="org-ul">
+<li>Implement <code>send-commands!</code>.
+</li>
+<li>The websocket expects commands as strings - you can <code>pr-str</code> the keywords.
+</li>
+<li>The server expects one of <code>#{:up :down :left :right}</code>.
+</li>
+<li>Don't worry about player-id - this is handled on the server.
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-26" >
+
+<h2>The finished game!</h2>
+<p>
+You should be able to open up multiple browser windows (or share your
+IP+port with a neighbour) to play multiplayer snake!
+</p>
+
+<p>
+<b>Congratulations!</b>
+</p>
+</section>
+</section>
+<section>
+<section id="sec-27" >
+
+<h2>What didn't we cover?</h2>
+<p>
+It was tough to fit 'all of Clojure' into four 2-hour sessions! We
+chose material based on <b>what we use most often</b> in our day-to-day
+work.
+</p>
+
+<p>
+As a result, we haven't covered:
+</p>
+<ul class="org-ul">
+<li>Java Interop
+</li>
+<li>File I/O
+</li>
+<li>Resources / Resource scoping
+</li>
+<li>Common formatting/parsing libraries
+</li>
+<li>Deployment
+</li>
+</ul>
+
+<p>
+If you have any questions about any of the above, feel free to ask,
+either in the pub, or on the mailing list!
+</p>
+</section>
+</section>
+<section>
+<section id="sec-28" >
+
+<h2>Cool Libraries</h2>
+<ul class="org-ul">
+<li>Cascalog
+</li>
+<li>Overtone
+</li>
+<li>Quill
+</li>
+<li>core.typed/Schema
+</li>
+<li>core.logic
+</li>
+<li>Datomic (database)
+</li>
+<li>clj-time (wrapping Joda time)
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-29" >
+
+<h2>Further learning</h2>
+<ul class="org-ul">
+<li><a href="http://clojure-doc.org/">http://clojure-doc.org/</a>
+</li>
+<li><a href="http://www.clojure-toolbox.com/">http://www.clojure-toolbox.com/</a>
+</li>
+<li><a href="http://www.braveclojure.com/">http://www.braveclojure.com/</a>
+</li>
+<li><a href="http://clojure.org/cheatsheet">http://clojure.org/cheatsheet</a>
+</li>
+<li>Google Groups
+<ul class="org-ul">
+<li>clojure
+</li>
+<li>london-clojurians
+</li>
+<li>ClojureScript
+</li>
+</ul>
+</li>
+<li>Talks at Skills Matter on first Tuesday of the month
+</li>
+</ul>
+</section>
+</section>
+<section>
+<section id="sec-30" >
+
+<h2>Clojure Dojos</h2>
+<p>
+See the London Clojurians mailing list or follow @ldnclj on Twitter
+Normally the second Monday or the last Tuesday of the month
+</p>
+</section>
+</section>
+</div>
+</div>
+<script src="./reveal.js/lib/js/head.min.js"></script>
+<script src="./reveal.js/js/reveal.min.js"></script>
+<script>
+
+        		// Full list of configuration options available here:
+        		// https://github.com/hakimel/reveal.js#configuration
+        		Reveal.initialize({
+        			controls: true,
+        			progress: true,
+        			history: true,
+        			center: true,
+        			rollingLinks: false,
+        			keyboard: true,
+        			overview: true,
+        			 // slide width
+        			 // slide height
+        			 // slide margin
+        			 // slide minimum scaling factor
+        			 // slide maximum scaling factor
+
+
+        			theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        			transition: Reveal.getQueryHash().transition || 'fade', // default/cube/page/concave/zoom/linear/fade/none
+        			transitionSpeed: 'default',
+
+        			// Optional libraries used to extend on reveal.js
+        			dependencies: [
+        				{ src: './reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } }
+        				,{ src: './reveal.js/plugin/markdown/showdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } }
+        				,{ src: './reveal.js/plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } }
+        				,{ src: './reveal.js/plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+        				,{ src: './reveal.js/plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } }
+        				,{ src: './reveal.js/plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: './reveal.js/plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+        				// { src: './reveal.js/plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+         				
+        			]
+        		});
+</script>
+</body>
+</html>

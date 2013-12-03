@@ -2,33 +2,45 @@
 #+Author: Likely
 #+Email: 
 
-#+REVEAL_EXTRA_CSS: css/zenburn.css
+#+REVEAL_EXTRA_CSS: css/main.css
 #+REVEAL_THEME: moon
 #+OPTIONS: num:nil toc:nil reveal_mathjax:t reveal_history:t
 #+REVEAL_TRANS: fade
 
 * Homework
 
+* What's up tonight?
+
+- Pizza/beer
+- Implementing a multiplayer snake game
+- Pub
+
 * OOP goodies
   Polymorphism
 
-  In computer science, polymorphism is a programming language feature that allows values of different data types to be handled using a uniform interface.
+  In computer science, polymorphism is a programming language feature
+  that allows values of different data types to be handled using a
+  uniform interface.
 
 * The Expression Problem
 
-The Expression Problem refers to the problem of making a language extensible. Software manipulates data types using operations. Sometimes, we want to add new operations, and have them work on existing data types. Sometimes, we want to add new data types, which will work with existing operations.
+The Expression Problem refers to the problem of making a language
+extensible. 
 
-* The Expression Problem
+Software manipulates data types using operations.
 
-  [[./images/expression-problem.png]]
+Sometimes, we want to add new operations, and have them work on
+existing data types. 
 
-  * Clojure 1.2 Protocols by Think Relevance on Vimeo http://vimeo.com/11236603
+Sometimes, we want to add new data types, which will work with
+existing operations.
 
 * A generalisation - OOP
 
   Object Oriented languages make it relatively easy to add new types
 
 |            | List.add | List.get | List.clear | List.size |
+|------------+----------+----------+------------+-----------|
 | ArrayList  |          |          |            |           |
 | LinkedList |          |          |            |           |
 | Stack      |          |          |            |           |
@@ -48,139 +60,258 @@ The Expression Problem refers to the problem of making a language extensible. So
 * Expressivity
 
   Being able to add new behaviours to existing types and new types to existing behaviours
-  
-* Clojure's solutions
-  
-  - Protocols
-  - Multimethods
-  - Other solutions we won't cover
+
+* Polymorphism in Clojure
+
+Polymorphism in functional languages is achieved differently to
+polymorphism in OOP languages.
+
+Clojure achieves polymorphism through *Protocols* and *Multimethods*
 
 * Protocols
+Protocols define of a set of functions that implementers should
+implement defined using =defprotocol=:
 
-It is common for polymorphic functions to dispatch (pick implementation) on the type of the first argument. For example, in Java or Ruby, when calling #toString or #to_s on an object, the exact implementation is located using that object's type.
+#+BEGIN_SRC clojure
+  (defprotocol PossiblyBlank
+    (blank? [_])
+    (value [_]))
+#+END_SRC
 
-This is a common case and the JVM can optimise this dispatch logic very well.
+Protocols are similar in nature to Java's interfaces, but without some
+of their drawbacks:
 
-Protocols are simply groups of functions. Each of the functions can have different implementations for different data types.
+- Protocols can be retroactively added to classes (and nil!)
+- Protocols are completely independent of each other (no inheritance hierarchy)
 
-* Eample
+* 'Implementing' protocols
 
-  #+BEGIN_SRC clojure
-(defprotocol DoesAThing
-  (do-a-thing [this] "Do a thing"))
+Protocols can be implemented by 'records' - a Clojure map with 'type'
+metadata (used for the dynamic dispatch)
 
-(extend-protocol DoesAThing
-  clojure.lang.PersistentVector
-    (do-a-thing [this] "A vector (via protocol)")
-  clojure.lang.PersistentArrayMap
-    (do-a-thing [this] "A map (via protocol)"))
-  #+END_SRC
-
-* This
-
-In object oriented languages, objects have an implicit 'this' that methods can refer to, scoped to the instance.
-
-Protocols are just groups of functions, not methods on an object, so the context is passed to them as a parameter as the first argument.
-
-* Exercise
+#+BEGIN_SRC clojure
+  (defrecord MyRecord [a-key b-key]
+    PossiblyBlank
+    (blank? [_] (not (or a-key b-key))
+    (value [this] this)))
   
-  Define a protocol called IsBlank that defines a single function blank?
+  (def record (MyRecord. :a :b))
+  (def record-2
+    (map->MyRecord {:a-key :a
+                    :b-key :b}))
+#+END_SRC
 
-  Implement this function for all strings. Hint: string's class is java.lang.String
+* Extending to existing types
+We can also extend existing types (and nil) with =extend-protocol=:
+#+BEGIN_SRC clojure
+  (extend-protocol PossiblyBlank
+    String
+    (blank? [s] (not (zero? (count s))))
+    (value [s] s)
+  
+    nil
+    (blank? [_] true)
+    (value [_] nil))
+#+END_SRC
 
-* Takeaways
+* Or create anonymous types
 
-  Notice how we did not need to own or edit Clojure's string implementation to add a protocol to it.
-
-* Reify
-
-  What if we want a type for a particular use-case, but don't need to give it a name?
-
-  Much like anonymous functions, reify allows you to define a type and use it in-place.
-
-* What protocols are not
-
-  - interfacing
-  - monkeypatching (code injection)
-  - wrappers
-  - mixins (multiple-inheritance)
-
-
-* ClojureScript detour - Externs
-
-We're including jQuery as an external library.
-
-* Sending data over websockets
-
-
-* Exercise
+We create anonymous types with =reify=:
+#+BEGIN_SRC clojure
+  (let [my-value (+ 4 5)]
+    (reify PossiblyBlank
+      (blank? [_] false)
+      (value [_] my-value)))
+#+END_SRC
 
 * Multimethods
 
-  A multimethod has a name and a dispatch function.
+We don't have to dispatch on type - we can dispatch on an arbitrary
+function:
 
-  The dispatch function takes the arguments passed to the multimethod and returns a value.
-
-  The returned value will define the implementation of the multimethod that gets used.
-
-* Ad-hoc Polymorphism
-
-  In OOP, method implementation is typically picked by traversing the class hierarchy.
-
-  With multimethods, the logic can be anything you need.
-
-* Example
-
-  #+BEGIN_SRC clojure
-(defmulti blank? class)
-  #+END_SRC
-
-  #+BEGIN_SRC clojure
-  (blank? "Hello World")
-=> IllegalArgumentException No method in multimethod 'blank?' for dispatch value: class java.lang.String  clojure.lang.MultiFn.getFn (MultiFn.java:160)
-  #+END_SRC
-
-  #+BEGIN_SRC clojure
-    (defmethod blank? String [s]
-      (every? #(Character/isWhitespace %) s))
-
-(blank? "Hello World")
-=> false
-  #+END_SRC
-
-* Exercise
+#+BEGIN_SRC clojure
+  (defmulti apply-command (fn [position command] command))
   
-* Handling commands with multimethods
+  (defmethod apply-command :move-up [position _]
+    (update-in position [:y] dec))
+  
+  (defmethod apply-command :move-right [position _]
+    (update-in position [:x] inc))
+#+END_SRC
 
-  Dispatch based on the first argument, the command type
+We can dispatch on type, by making the dispatch function '=type='.
 
-* Other polymorphic techniques
+* Multimethods
 
-These are intended for cases where you need to interface with Java code
+The implementations of a multimethod do not have to reside with the
+original =defmulti= definition.
 
-  - proxy
-  - gen-class
+#+BEGIN_SRC clojure
+  (defmethod print-method PossiblyBlank [this w] 
+    (.write w (if (blank? this)
+                (pr-str (value this))
+                "blank")))
+#+END_SRC
 
-* Making it multiplayer
+
+* Multiplayer Snake
+
+You'll need to clone
+
+https://github.com/likely/snake.git
+
+* Of Widgets and Models
+
+#+BEGIN_HTML
+<img src="images/widgets-models.svg" />
+#+END_HTML
+
+* Your first challenge:
+
+Define and implement the GameBoardComponent protocol in =/src/cljs/snake/cljs/board_widget.cljs=
+
+It'll need:
+
+- a way to render a 'snake' (given a list of cells)
+- a way to render an 'apple' (given x-y co-ords)
+- a way to clear the canvas for the next frame (hint - 'clearRect')
 
 * Laziness
+Recap: map is *lazy* - unless you evaluate the results it won't do any work!
 
-* The finished game
+We force this by using =dorun= (if we don't care about the return value) or =doall= (if we do):
+
+#+BEGIN_SRC clojure
+  (dorun (map render-cell! cells))
+#+END_SRC
+
+Or we can use =doseq= (an eager equivalent of =for=):
+
+#+BEGIN_SRC clojure
+  (doseq [cell cells]
+    (render-cell! cell))
+#+END_SRC
+
+* Testing your 'component'
+
+You can test your component by injecting 'test code' into the
+=make-board-widget= function:
+
+#+BEGIN_SRC clojure
+  (let [board ...]
+  
+    (render-snake! board [[7 4] [7 5] [7 6]])
+    
+    (board->node board))
+#+END_SRC
+
+* Your second challenge: wiring up the game state
+
+Implement the =watch-game!= function.
+
+Every time the =!game= atom changes, we'll need to clear the board, and
+draw the new state.
+
+An example =!game= state is in =/src/cljs/snake/cljs/multiplayer_model.cljs=
+
+Again, test by injecting code into =make-board-widget=:
+
+#+BEGIN_SRC clojure
+  (reset! !game ...test-game-state...)
+#+END_SRC
+
+* Your third challenge: sending the commands to the model
+
+Implement the =bind-commands!= function
+
+- Add a function to the protocol which returns a channel of events
+- Implement it!
+- In =bind-commands!=, you can then pipe these events straight to the model channel with core.async's =pipe=:
+
+#+BEGIN_SRC clojure
+  (a/pipe src-ch dest-ch)
+#+END_SRC
+
+* Server-client communication with WebSockets
+
+WebSockets are persistent channels through which data can be sent
+in both directions between the browser and the server.
+
+*Chord* is a library that turns WebSockets into core.async channels
+
+Full documentation at:
+
+https://github.com/james-henderson/chord.git
+
+* Client-side Chord:
+
+#+BEGIN_SRC clojure
+(:require [chord.client :refer [ws-ch]]
+          [cljs.core.async :refer [<! >! put! close!]])
+(:require-macros [cljs.core.async.macros :refer [go]])
+
+(go
+  (let [server-conn (<! (ws-ch "ws://localhost:3000/ws"))]
+    (>! server-conn "Hello server from client!")))
+#+END_SRC
+
+Messages that come from the server are received as a map with a =:message= key:
+
+#+BEGIN_SRC clojure
+  (go
+    (let [server-conn (<! (ws-ch "ws://localhost:3000/ws"))]
+      (js/console.log "Got message from server:"
+                      (:message (<! server-conn)))))
+#+END_SRC
+
+* Your fourth challenge: rendering the state from the server
+
+In =/src/cljs/snake/cljs/multiplayer_model.cljs=:
+
+- Implement =watch-state!=.
+- You might want to start by =js/console.log='ging everything you get
+  back from the server!
+- When it all works, you should see a small snake going from
+  right->left
+
+* Your final challenge: send your commands to the server
+
+- Implement =send-commands!=.
+- The websocket expects commands as strings - you can =pr-str= the keywords.
+- The server expects one of =#{:up :down :left :right}=.
+- Don't worry about player-id - this is handled on the server.
+
+* The finished game!
+You should be able to open up multiple browser windows (or share your
+IP+port with a neighbour) to play multiplayer snake!
+
+*Congratulations!*
 
 * What didn't we cover?
-  - Java Interop
-  - Resources
-  - Scoping
-  - Deployment
-  - Heroku
+It was tough to fit 'all of Clojure' into four 2-hour sessions! We
+chose material based on *what we use most often* in our day-to-day
+work.
+
+As a result, we haven't covered:
+- Java Interop
+- File I/O
+- Resources / Resource scoping
+- Common formatting/parsing libraries
+- Deployment
+
+If you have any questions about any of the above, feel free to ask,
+either in the pub, or on the mailing list!
 
 * Cool Libraries
-  - Cascalog
-  - Overtone
-  - core.typed
-  - Schema
+- Cascalog
+- Overtone
+- Quill
+- core.typed/Schema
+- core.logic
+- Datomic (database)
+- clj-time (wrapping Joda time)
 
-* Futher learning
+* Further learning
   - http://clojure-doc.org/
   - http://www.clojure-toolbox.com/
   - http://www.braveclojure.com/
@@ -195,3 +326,4 @@ These are intended for cases where you need to interface with Java code
 
   See the London Clojurians mailing list or follow @ldnclj on Twitter
   Normally the second Monday or the last Tuesday of the month
+

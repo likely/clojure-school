@@ -1,0 +1,15 @@
+.reveal table {
+    margin-top: 1em;
+}
+
+
+
+.reveal table td, .reveal table th {
+    border: 1px solid grey;
+    text-align: center;
+    padding: 0.5em;
+}
+
+.reveal code {
+    color: #a3e1e1;
+}
