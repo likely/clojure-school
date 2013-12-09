@@ -23,7 +23,13 @@
   * Core.async and CSP
   * ClojureScript
   * [Homework template](https://github.com/likely/sketchy)
-* [Part 4] - TBD
+* [Part 4](https://github.com/likely/clojure-school/blob/master/part-4.org)
+  * Polymorphism in Clojure
+  * Protocols
+  * Multimethods
+  * Websockets and channels
+  * Building a multiplayer game of snake!
+  * [Example code](https://github.com/likely/snake)
 
 ## Thanks
 
